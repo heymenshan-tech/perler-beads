@@ -25,14 +25,14 @@ const FocusModePreDownloadModal: React.FC<FocusModePreDownloadModalProps> = ({
   if (!isOpen) return null;
 
   const handleDownloadAndProceed = () => {
-    // 下载CSV数据文件
+    // CSV 데이터 파일 다운로드
     exportCsvData({
       mappedPixelData,
       gridDimensions,
       selectedColorSystem
     });
     
-    // 稍等一下让下载开始，然后进入专心拼豆模式
+    // 다운로드가 시작될 때까지 잠시 기다린 후 집중 펄러비즈 모드로 진입
     setTimeout(() => {
       onProceedWithoutDownload();
     }, 500);
@@ -41,7 +41,7 @@ const FocusModePreDownloadModal: React.FC<FocusModePreDownloadModalProps> = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4">
-        {/* 标题 */}
+        {/* 제목 */}
         <div className="text-center">
           <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/50 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -50,11 +50,11 @@ const FocusModePreDownloadModal: React.FC<FocusModePreDownloadModalProps> = ({
             </svg>
           </div>
           <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-            进入专心拼豆模式
+            집중 펄러비즈 모드 시작
           </h3>
         </div>
 
-        {/* 提醒内容 */}
+        {/* 안내 내용 */}
         <div className="text-sm text-gray-600 dark:text-gray-300 space-y-3">
           <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800/40 rounded-lg p-3">
             <div className="flex items-start space-x-2">
@@ -62,26 +62,26 @@ const FocusModePreDownloadModal: React.FC<FocusModePreDownloadModalProps> = ({
                 <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
               <div>
-                <p className="font-medium text-yellow-800 dark:text-yellow-200">重要提醒</p>
+                <p className="font-medium text-yellow-800 dark:text-yellow-200">중요 안내</p>
                 <p className="text-yellow-700 dark:text-yellow-300">
-                  进入专心拼豆模式后，您将无法返回到当前的编辑界面。建议您先下载当前的数据文件（CSV格式）保存，以便日后重新导入使用。
+                  집중 펄러비즈 모드에 들어가면 현재 편집 화면으로 돌아올 수 없습니다. 나중에 다시 불러올 수 있도록 현재 데이터 파일(CSV 형식)을 먼저 다운로드하여 저장하는 것을 권장합니다.
                 </p>
               </div>
             </div>
           </div>
 
           <div className="space-y-2">
-            <p>专心拼豆模式特点：</p>
+            <p>집중 펄러비즈 모드 특징:</p>
             <ul className="text-xs space-y-1 text-gray-500 dark:text-gray-400">
-              <li>• 专为手机优化的拼豆助手</li>
-              <li>• 提供颜色引导和进度追踪</li>
-              <li>• 支持触摸操作和缩放查看</li>
-              <li>• 退出后将丢失当前编辑状态</li>
+              <li>• 모바일에 최적화된 펄러비즈 작업 도우미</li>
+              <li>• 색상 안내 및 진행 상황 추적</li>
+              <li>• 터치 조작 및 확대/축소 지원</li>
+              <li>• 종료하면 현재 편집 상태가 사라집니다</li>
             </ul>
           </div>
         </div>
 
-        {/* 操作按钮 */}
+        {/* 작업 버튼 */}
         <div className="flex flex-col space-y-2 pt-4">
           <button
             onClick={handleDownloadAndProceed}
@@ -90,21 +90,21 @@ const FocusModePreDownloadModal: React.FC<FocusModePreDownloadModalProps> = ({
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
-            <span>下载数据文件并进入</span>
+            <span>데이터 파일 다운로드 후 시작</span>
           </button>
           
           <button
             onClick={onProceedWithoutDownload}
             className="w-full py-2.5 px-4 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-all duration-200"
           >
-            直接进入（不下载）
+            다운로드 없이 바로 시작
           </button>
           
           <button
             onClick={onClose}
             className="w-full py-2 px-4 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-sm transition-colors"
           >
-            取消
+            취소
           </button>
         </div>
       </div>
@@ -112,4 +112,4 @@ const FocusModePreDownloadModal: React.FC<FocusModePreDownloadModalProps> = ({
   );
 };
 
-export default FocusModePreDownloadModal; 
+export default FocusModePreDownloadModal;
