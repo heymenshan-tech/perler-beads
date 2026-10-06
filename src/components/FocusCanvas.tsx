@@ -40,10 +40,10 @@ const FocusCanvas: React.FC<FocusCanvasProps> = ({
   const [lastPanPoint, setLastPanPoint] = useState<{ x: number; y: number } | null>(null);
   const [lastPinchDistance, setLastPinchDistance] = useState<number | null>(null);
 
-  // 计算格子大小
+  // 칸 크기 계산
   const cellSize = Math.max(15, Math.min(40, 300 / Math.max(gridDimensions.N, gridDimensions.M)));
 
-  // 渲染画布
+  // 캔버스 렌더링
   const renderCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas || !mappedPixelData) return;
@@ -51,7 +51,7 @@ const FocusCanvas: React.FC<FocusCanvasProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // 设置画布尺寸
+    // 캔버스 크기 설정
     const canvasWidth = gridDimensions.N * cellSize;
     const canvasHeight = gridDimensions.M * cellSize;
     
@@ -60,10 +60,10 @@ const FocusCanvas: React.FC<FocusCanvasProps> = ({
     canvas.style.width = `${canvasWidth}px`;
     canvas.style.height = `${canvasHeight}px`;
 
-    // 清空画布
+    // 캔버스 초기화
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-    // 渲染每个格子
+    // 각 칸 렌더링
     for (let row = 0; row < gridDimensions.M; row++) {
       for (let col = 0; col < gridDimensions.N; col++) {
         const pixel = mappedPixelData[row][col];
@@ -71,12 +71,12 @@ const FocusCanvas: React.FC<FocusCanvasProps> = ({
         const y = row * cellSize;
         const cellKey = `${row},${col}`;
 
-        // 确定格子颜色
+        // 칸 색상 결정
         let fillColor = pixel.color;
 
-        // 如果不是当前颜色，显示为灰度
+        // 현재 색상이 아니면 회색조로 표시
         if (pixel.color !== currentColor) {
-          // 转换为灰度
+          // 회색조로 변환
           const hex = pixel.color.replace('#', '');
           const r = parseInt(hex.substr(0, 2), 16);
           const g = parseInt(hex.substr(2, 2), 16);
@@ -85,16 +85,16 @@ const FocusCanvas: React.FC<FocusCanvasProps> = ({
           fillColor = `rgb(${gray}, ${gray}, ${gray})`;
         }
 
-        // 绘制格子背景
+        // 칸 배경 그리기
         ctx.fillStyle = fillColor;
         ctx.fillRect(x, y, cellSize, cellSize);
 
-        // 如果是已完成的格子且是当前颜色，添加勾选标记
+        // 완료된 칸이면서 현재 색상인 경우 체크 표시 추가
         if (completedCells.has(cellKey) && pixel.color === currentColor) {
           ctx.fillStyle = 'rgba(0, 255, 0, 0.6)';
           ctx.fillRect(x, y, cellSize, cellSize);
           
-          // 绘制勾选图标
+          // 체크 아이콘 그리기
           ctx.strokeStyle = '#fff';
           ctx.lineWidth = 2;
           ctx.beginPath();
@@ -104,7 +104,7 @@ const FocusCanvas: React.FC<FocusCanvasProps> = ({
           ctx.stroke();
         }
 
-        // 如果是推荐区域的一部分，添加高亮边框
+        // 추천 영역에 포함된 경우 강조 테두리 추가
         const isInRecommendedRegion = recommendedRegion?.some(cell => 
           cell.row === row && cell.col === col
         );
@@ -116,27 +116,23 @@ const FocusCanvas: React.FC<FocusCanvasProps> = ({
           ctx.setLineDash([]);
         }
         
-        // 如果是推荐区域的中心点，添加特殊标记
+        // 추천 영역의 중심점인 경우 특별 표시 추가
         if (recommendedCell && recommendedCell.row === row && recommendedCell.col === col && isInRecommendedRegion) {
-          // 绘制中心点标记
+          // 중심점 표시 그리기
           ctx.fillStyle = '#ff4444';
           ctx.beginPath();
           ctx.arc(x + cellSize / 2, y + cellSize / 2, 4, 0, 2 * Math.PI);
           ctx.fill();
         }
-
-
-
-
       }
     }
 
-    // 绘制分区线（在所有格子绘制完成后）
+    // 모든 칸을 그린 후 구역 구분선 그리기
     if (showSectionLines) {
       ctx.strokeStyle = sectionLineColor;
       ctx.lineWidth = 2;
       
-      // 绘制竖直分区线
+      // 세로 구역 구분선 그리기
       for (let col = gridSectionInterval; col < gridDimensions.N; col += gridSectionInterval) {
         const x = col * cellSize;
         ctx.beginPath();
@@ -145,7 +141,7 @@ const FocusCanvas: React.FC<FocusCanvasProps> = ({
         ctx.stroke();
       }
       
-      // 绘制水平分区线
+      // 가로 구역 구분선 그리기
       for (let row = gridSectionInterval; row < gridDimensions.M; row += gridSectionInterval) {
         const y = row * cellSize;
         ctx.beginPath();
@@ -156,7 +152,7 @@ const FocusCanvas: React.FC<FocusCanvasProps> = ({
     }
   }, [mappedPixelData, gridDimensions, cellSize, currentColor, completedCells, recommendedCell, recommendedRegion, gridSectionInterval, showSectionLines, sectionLineColor]);
 
-  // 处理触摸/鼠标事件
+  // 터치/마우스 이벤트 처리
   const getEventPosition = useCallback((event: React.MouseEvent | React.TouchEvent) => {
     const canvas = canvasRef.current;
     if (!canvas) return null;
@@ -189,7 +185,7 @@ const FocusCanvas: React.FC<FocusCanvasProps> = ({
     return null;
   }, [cellSize, gridDimensions]);
 
-  // 计算两指间距离
+  // 두 손가락 사이의 거리 계산
   const getTouchDistance = (touches: React.TouchList) => {
     if (touches.length < 2) return 0;
     const touch1 = touches[0];
@@ -199,7 +195,7 @@ const FocusCanvas: React.FC<FocusCanvasProps> = ({
     return Math.sqrt(dx * dx + dy * dy);
   };
 
-  // 处理点击
+  // 클릭 처리
   const handleClick = useCallback((event: React.MouseEvent | React.TouchEvent) => {
     event.preventDefault();
     
@@ -212,7 +208,7 @@ const FocusCanvas: React.FC<FocusCanvasProps> = ({
     }
   }, [onCellClick, getEventPosition, getGridPosition]);
 
-  // 处理缩放
+  // 확대/축소 처리
   const handleWheel = useCallback((event: React.WheelEvent) => {
     event.preventDefault();
     
@@ -221,10 +217,10 @@ const FocusCanvas: React.FC<FocusCanvasProps> = ({
     onScaleChange(newScale);
   }, [canvasScale, onScaleChange]);
 
-  // 处理双指缩放（触摸）
+  // 두 손가락 확대/축소 처리 (터치)
   const handleTouchStart = useCallback((event: React.TouchEvent) => {
     if (event.touches.length === 1) {
-      // 单指拖拽开始
+      // 한 손가락 드래그 시작
       setIsDragging(true);
       setLastPanPoint({
         x: event.touches[0].clientX,
@@ -232,7 +228,7 @@ const FocusCanvas: React.FC<FocusCanvasProps> = ({
       });
       setLastPinchDistance(null);
     } else if (event.touches.length === 2) {
-      // 双指缩放开始
+      // 두 손가락 확대/축소 시작
       event.preventDefault();
       setIsDragging(false);
       setLastPanPoint(null);
@@ -244,7 +240,7 @@ const FocusCanvas: React.FC<FocusCanvasProps> = ({
     event.preventDefault();
     
     if (event.touches.length === 1 && isDragging && lastPanPoint) {
-      // 单指拖拽
+      // 한 손가락 드래그
       const deltaX = event.touches[0].clientX - lastPanPoint.x;
       const deltaY = event.touches[0].clientY - lastPanPoint.y;
       
@@ -258,15 +254,15 @@ const FocusCanvas: React.FC<FocusCanvasProps> = ({
         y: event.touches[0].clientY
       });
     } else if (event.touches.length === 2 && lastPinchDistance !== null) {
-      // 双指缩放处理
+      // 두 손가락 확대/축소 처리
       const currentDistance = getTouchDistance(event.touches);
       const scaleRatio = currentDistance / lastPinchDistance;
       
-      // 限制缩放范围并应用缩放
+      // 확대/축소 범위를 제한하고 적용
       const newScale = Math.max(0.3, Math.min(3, canvasScale * scaleRatio));
       onScaleChange(newScale);
       
-      // 更新距离记录
+      // 거리 기록 업데이트
       setLastPinchDistance(currentDistance);
     }
   }, [isDragging, lastPanPoint, canvasOffset, onOffsetChange, lastPinchDistance, canvasScale, onScaleChange]);
@@ -277,12 +273,12 @@ const FocusCanvas: React.FC<FocusCanvasProps> = ({
       setLastPanPoint(null);
       setLastPinchDistance(null);
       
-      // 如果没有移动太多，视为点击
+      // 이동이 거의 없으면 클릭으로 처리
       if (!isDragging) {
         handleClick(event);
       }
     } else if (event.touches.length === 1) {
-      // 从双指缩放切换到单指拖拽
+      // 두 손가락 확대/축소에서 한 손가락 드래그로 전환
       setLastPinchDistance(null);
       setIsDragging(true);
       setLastPanPoint({
@@ -292,7 +288,7 @@ const FocusCanvas: React.FC<FocusCanvasProps> = ({
     }
   }, [isDragging, handleClick]);
 
-  // 鼠标拖拽处理
+  // 마우스 드래그 처리
   const handleMouseDown = useCallback((event: React.MouseEvent) => {
     setIsDragging(true);
     setLastPanPoint({
@@ -323,7 +319,7 @@ const FocusCanvas: React.FC<FocusCanvasProps> = ({
     setLastPanPoint(null);
   }, []);
 
-  // 渲染画布
+  // 캔버스 렌더링
   useEffect(() => {
     renderCanvas();
   }, [renderCanvas]);
