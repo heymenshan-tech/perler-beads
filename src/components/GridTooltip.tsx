@@ -21,8 +21,8 @@ const GridTooltip: React.FC<GridTooltipProps> = ({ tooltipData, selectedColorSys
       className="absolute bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg pointer-events-none flex items-center space-x-1.5 z-50"
       style={{
         left: `${tooltipData.x}px`, 
-        top: `${tooltipData.y - 25}px`, // 向上偏移，使提示框显示在鼠标上方
-        transform: 'translate(-50%, -100%)', // 水平居中，不再垂直偏移
+        top: `${tooltipData.y - 25}px`, // 위쪽으로 이동하여 툴팁이 마우스 위에 표시되도록 함
+        transform: 'translate(-50%, -100%)', // 가로로 가운데 정렬하고 추가 세로 이동은 하지 않음
         whiteSpace: 'nowrap',
       }}
     >
@@ -35,4 +35,4 @@ const GridTooltip: React.FC<GridTooltipProps> = ({ tooltipData, selectedColorSys
   );
 };
 
-export default GridTooltip; 
+export default GridTooltip;
