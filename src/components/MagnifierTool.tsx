@@ -38,7 +38,7 @@ const MagnifierTool: React.FC<MagnifierToolProps> = ({
   onActivateFloating,
   highlightColorKey
 }) => {
-  // 计算初始位置，确保在屏幕中央
+  // 초기 위치를 계산하여 화면 중앙에 배치
   const getInitialPosition = () => ({
     x: Math.max(50, (window.innerWidth - 400) / 2),
     y: Math.max(50, (window.innerHeight - 400) / 2)
@@ -48,7 +48,7 @@ const MagnifierTool: React.FC<MagnifierToolProps> = ({
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   
-  // 每次激活放大镜时重置位置
+  // 돋보기를 활성화할 때마다 위치 초기화
   useEffect(() => {
     if (isActive) {
       setMagnifierPosition(getInitialPosition());
@@ -58,7 +58,7 @@ const MagnifierTool: React.FC<MagnifierToolProps> = ({
   const magnifierRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // 计算选择区域的尺寸
+  // 선택 영역 크기 계산
   const getSelectionDimensions = useCallback(() => {
     if (!selectionArea) return { width: 0, height: 0 };
     return {
@@ -67,7 +67,7 @@ const MagnifierTool: React.FC<MagnifierToolProps> = ({
     };
   }, [selectionArea]);
 
-  // 渲染放大视图
+  // 확대 화면 렌더링
   const renderMagnifiedView = useCallback(() => {
     if (!selectionArea || !mappedPixelData || !canvasRef.current) return;
 
@@ -76,20 +76,20 @@ const MagnifierTool: React.FC<MagnifierToolProps> = ({
     if (!ctx) return;
 
     const { width, height } = getSelectionDimensions();
-    const magnifiedCellSize = 20; // 放大后每个像素的大小
+    const magnifiedCellSize = 20; // 확대 후 각 픽셀의 크기
     
-    // 设置画布的实际尺寸
+    // 캔버스 실제 크기 설정
     canvas.width = width * magnifiedCellSize;
     canvas.height = height * magnifiedCellSize;
     
-    // 保持真实尺寸，不压缩
+    // 실제 크기를 유지하고 축소하지 않음
     canvas.style.width = `${canvas.width}px`;
     canvas.style.height = `${canvas.height}px`;
 
-    // 清空画布
+    // 캔버스 초기화
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 渲染放大的像素
+    // 확대된 픽셀 렌더링
     const startRow = Math.min(selectionArea.startRow, selectionArea.endRow);
     const endRow = Math.max(selectionArea.startRow, selectionArea.endRow);
     const startCol = Math.min(selectionArea.startCol, selectionArea.endCol);
@@ -102,7 +102,7 @@ const MagnifierTool: React.FC<MagnifierToolProps> = ({
           const canvasRow = row - startRow;
           const canvasCol = col - startCol;
           
-          // 绘制像素
+          // 픽셀 그리기
           ctx.fillStyle = pixel.color;
           ctx.fillRect(
             canvasCol * magnifiedCellSize,
@@ -111,9 +111,9 @@ const MagnifierTool: React.FC<MagnifierToolProps> = ({
             magnifiedCellSize
           );
 
-          // 如果有高亮颜色且当前像素不是目标颜色，添加灰度蒙版
+          // 강조 색상이 설정되어 있고 현재 픽셀이 대상 색상이 아니면 어두운 오버레이 추가
           if (highlightColorKey && pixel.color.toUpperCase() !== highlightColorKey.toUpperCase()) {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'; // 60% 透明度的黑色蒙版，与预览画布一致
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'; // 60% 투명도의 검은색 오버레이, 미리보기 캔버스와 동일
             ctx.fillRect(
               canvasCol * magnifiedCellSize,
               canvasRow * magnifiedCellSize,
@@ -122,7 +122,7 @@ const MagnifierTool: React.FC<MagnifierToolProps> = ({
             );
           }
 
-          // 绘制网格线
+          // 그리드 선 그리기
           ctx.strokeStyle = '#e0e0e0';
           ctx.lineWidth = 1;
           ctx.strokeRect(
@@ -136,14 +136,14 @@ const MagnifierTool: React.FC<MagnifierToolProps> = ({
     }
   }, [selectionArea, mappedPixelData, getSelectionDimensions, highlightColorKey]);
 
-  // 处理放大视图点击
+  // 확대 화면 클릭 처리
   const handleMagnifiedClick = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
     if (!selectionArea || !mappedPixelData || !selectedColor || !canvasRef.current) return;
 
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
     
-    // 获取点击在画布上的相对位置（考虑缩放）
+    // 캔버스에서 클릭한 상대 위치 가져오기 (확대/축소 고려)
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
     
@@ -160,43 +160,43 @@ const MagnifierTool: React.FC<MagnifierToolProps> = ({
     const actualRow = startRow + clickedRow;
     const actualCol = startCol + clickedCol;
 
-    // 确保点击在有效范围内
+    // 클릭 위치가 유효한 범위 내인지 확인
     if (actualRow >= 0 && actualRow < mappedPixelData.length && 
         actualCol >= 0 && actualCol < mappedPixelData[0].length) {
       onPixelEdit(actualRow, actualCol, selectedColor);
     }
   }, [selectionArea, mappedPixelData, selectedColor, onPixelEdit]);
 
-  // 处理拖拽移动 - 鼠标事件
+  // 드래그 이동 처리 - 마우스 이벤트
   const handleTitleBarMouseDown = useCallback((event: React.MouseEvent) => {
-    // 只有点击在标题栏区域且不是按钮时才开始拖拽
+    // 제목 표시줄 영역을 클릭했고 버튼이 아닌 경우에만 드래그 시작
     const target = event.target as HTMLElement;
     if (target.tagName === 'BUTTON' || target.closest('button')) {
-      return; // 点击按钮时不拖拽
+      return; // 버튼 클릭 시 드래그하지 않음
     }
     
     if (magnifierRef.current) {
       const rect = magnifierRef.current.getBoundingClientRect();
-      // 记录鼠标相对于窗口左上角的偏移
+      // 창 왼쪽 위를 기준으로 마우스의 상대 위치 기록
       setDragOffset({
         x: event.clientX - rect.left,
         y: event.clientY - rect.top
       });
     }
     
-    onActivateFloating(); // 激活放大镜，置于最上层
+    onActivateFloating(); // 돋보기를 활성화하여 최상단에 표시
     setIsDragging(true);
-    // 阻止页面滚动
+    // 페이지 스크롤 방지
     document.body.style.overflow = 'hidden';
     event.preventDefault();
   }, [onActivateFloating]);
 
-  // 处理拖拽移动 - 触摸事件
+  // 드래그 이동 처리 - 터치 이벤트
   const handleTitleBarTouchStart = useCallback((event: React.TouchEvent) => {
-    // 只有点击在标题栏区域且不是按钮时才开始拖拽
+    // 제목 표시줄 영역을 터치했고 버튼이 아닌 경우에만 드래그 시작
     const target = event.target as HTMLElement;
     if (target.tagName === 'BUTTON' || target.closest('button')) {
-      return; // 点击按钮时不拖拽
+      return; // 버튼 터치 시 드래그하지 않음
     }
     
     const touch = event.touches[0];
@@ -204,16 +204,16 @@ const MagnifierTool: React.FC<MagnifierToolProps> = ({
     
     if (magnifierRef.current) {
       const rect = magnifierRef.current.getBoundingClientRect();
-      // 记录触摸相对于窗口左上角的偏移
+      // 창 왼쪽 위를 기준으로 터치 위치의 상대 좌표 기록
       setDragOffset({
         x: touch.clientX - rect.left,
         y: touch.clientY - rect.top
       });
     }
     
-    onActivateFloating(); // 激活放大镜，置于最上层
+    onActivateFloating(); // 돋보기를 활성화하여 최상단에 표시
     setIsDragging(true);
-    // 阻止页面滚动
+    // 페이지 스크롤 방지
     document.body.style.overflow = 'hidden';
     event.preventDefault();
   }, [onActivateFloating]);
@@ -222,7 +222,7 @@ const MagnifierTool: React.FC<MagnifierToolProps> = ({
     if (isDragging) {
       event.preventDefault();
       event.stopPropagation();
-      // 计算新位置，保持鼠标相对于窗口的偏移不变，不限制边界
+      // 경계를 제한하지 않고 창에 대한 마우스의 상대 위치를 유지하여 새 위치 계산
       const newX = event.clientX - dragOffset.x;
       const newY = event.clientY - dragOffset.y;
       setMagnifierPosition({ x: newX, y: newY });
@@ -236,7 +236,7 @@ const MagnifierTool: React.FC<MagnifierToolProps> = ({
       const touch = event.touches[0];
       if (!touch) return;
       
-      // 计算新位置，保持触摸相对于窗口的偏移不变，不限制边界
+      // 경계를 제한하지 않고 창에 대한 터치의 상대 위치를 유지하여 새 위치 계산
       const newX = touch.clientX - dragOffset.x;
       const newY = touch.clientY - dragOffset.y;
       setMagnifierPosition({ x: newX, y: newY });
@@ -245,13 +245,13 @@ const MagnifierTool: React.FC<MagnifierToolProps> = ({
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
-    // 恢复页面滚动
+    // 페이지 스크롤 복원
     document.body.style.overflow = '';
   }, []);
 
   const handleTouchEnd = useCallback(() => {
     setIsDragging(false);
-    // 恢复页面滚动
+    // 페이지 스크롤 복원
     document.body.style.overflow = '';
   }, []);
 
@@ -267,13 +267,13 @@ const MagnifierTool: React.FC<MagnifierToolProps> = ({
         document.removeEventListener('mouseup', handleMouseUp);
         document.removeEventListener('touchmove', handleTouchMove);
         document.removeEventListener('touchend', handleTouchEnd);
-        // 清理时恢复滚动
+        // 정리 시 페이지 스크롤 복원
         document.body.style.overflow = '';
       };
     }
   }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
 
-  // 重新渲染放大视图
+  // 확대 화면 다시 렌더링
   useEffect(() => {
     renderMagnifiedView();
   }, [renderMagnifiedView]);
@@ -282,19 +282,19 @@ const MagnifierTool: React.FC<MagnifierToolProps> = ({
 
   return (
     <>
-      {/* 选择区域提示 */}
+      {/* 선택 영역 안내 */}
       {!selectionArea && (
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-[70]">
           <div className="flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <span>在画布上拖拽选择要放大的区域</span>
+            <span>도안에서 드래그하여 확대할 영역을 선택하세요</span>
           </div>
         </div>
       )}
 
-      {/* 放大视图窗口 */}
+      {/* 확대 화면 창 */}
       {selectionArea && (
         <div
           ref={magnifierRef}
@@ -307,7 +307,7 @@ const MagnifierTool: React.FC<MagnifierToolProps> = ({
           }}
           onClick={onActivateFloating}
         >
-          {/* 标题栏 */}
+          {/* 제목 표시줄 */}
           <div 
             className="flex items-center justify-between p-3 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-t-xl cursor-move"
             onMouseDown={handleTitleBarMouseDown}
@@ -317,26 +317,26 @@ const MagnifierTool: React.FC<MagnifierToolProps> = ({
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              <span className="text-sm font-medium">放大镜 ({getSelectionDimensions().width}×{getSelectionDimensions().height})</span>
+              <span className="text-sm font-medium">돋보기 ({getSelectionDimensions().width}×{getSelectionDimensions().height})</span>
             </div>
             
             <div className="flex items-center gap-2">
-              {/* 重新选择按钮 */}
+              {/* 영역 다시 선택 버튼 */}
               <button
                 onClick={onClearSelection}
                 className="p-1 hover:bg-white/20 rounded transition-colors"
-                title="重新选择区域"
+                title="영역 다시 선택"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
               </button>
               
-              {/* 关闭按钮 */}
+              {/* 닫기 버튼 */}
               <button
                 onClick={onToggle}
                 className="p-1 hover:bg-white/20 rounded transition-colors"
-                title="关闭放大镜"
+                title="돋보기 닫기"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -345,7 +345,7 @@ const MagnifierTool: React.FC<MagnifierToolProps> = ({
             </div>
           </div>
 
-          {/* 放大视图内容 */}
+          {/* 확대 화면 내용 */}
           <div className="p-3">
             <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-auto max-h-96">
               <canvas
@@ -355,7 +355,7 @@ const MagnifierTool: React.FC<MagnifierToolProps> = ({
               />
             </div>
             
-            {/* 当前选中颜色信息 */}
+            {/* 현재 선택한 색상 정보 */}
             {selectedColor && (
               <div className="mt-2 p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
                 <div className="flex items-center gap-2 text-xs">
@@ -364,7 +364,7 @@ const MagnifierTool: React.FC<MagnifierToolProps> = ({
                     style={{ backgroundColor: selectedColor.color }}
                   ></div>
                   <span className="text-gray-700 dark:text-gray-300">
-                    当前: {getColorKeyByHex(selectedColor.color, selectedColorSystem)}
+                    현재: {getColorKeyByHex(selectedColor.color, selectedColorSystem)}
                   </span>
                 </div>
               </div>
@@ -376,4 +376,4 @@ const MagnifierTool: React.FC<MagnifierToolProps> = ({
   );
 };
 
-export default MagnifierTool; 
+export default MagnifierTool;
