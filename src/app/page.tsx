@@ -2028,7 +2028,7 @@ export default function Home() {
               {/* Brand name - 치카와 with ultra fancy effects */}
               <div className="relative">
                 <h1 className="relative text-4xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 via-blue-500 to-cyan-400 tracking-wider drop-shadow-2xl transform hover:scale-105 transition-transform duration-300">
-                  치카와
+                  Qiao Yi
                 </h1>
                 
                 {/* Super fancy geometric decorations */}
@@ -2048,11 +2048,11 @@ export default function Home() {
                 <div className="absolute bottom-1 right-0 w-1 h-1 bg-purple-300 rounded-full animate-pulse delay-1000"></div>
               </div>
               
-              {/* Tool name - 펄러비즈 도안 생성기 with hyper cute style */}
+              {/* Tool name - 핀또우 도안 생성기 with hyper cute style */}
               <div className="relative">
                 <h2 className="relative text-xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-teal-500 via-green-500 to-emerald-400 tracking-widest transform hover:scale-102 transition-all duration-300">
-                  펄러비즈 도안 생성기
-                  <span className="text-xs font-normal text-gray-400 dark:text-gray-500 tracking-widest ml-1 align-middle">세로 화면 버전</span>
+                  핀또우 도안 생성기
+                  <span className="text-xs font-normal text-gray-400 dark:text-gray-500 tracking-widest ml-1 align-middle">세로 버전</span>
                 </h2>
                 
                 {/* Super cute geometric shapes */}
@@ -2101,7 +2101,7 @@ export default function Home() {
           </div>
           {/* Slogan */}
           <p className="mt-3 text-sm sm:text-base font-light text-gray-500 dark:text-gray-400 text-center tracking-[0.15em]">
-            누구나 픽셀 아트를 즐길 수 있도록
+            누구나 픽셀 아트를 즐길 수 있기를!
           </p>
 
           {/* 来源提示 */}
