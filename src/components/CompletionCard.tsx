@@ -23,7 +23,7 @@ const CompletionCard: React.FC<CompletionCardProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const cardCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  // 计算总豆子数（排除透明区域）
+  // 총 비즈 수 계산 (투명 영역 제외)
   const totalBeads = React.useMemo(() => {
     if (!mappedPixelData) return 0;
     
@@ -31,7 +31,7 @@ const CompletionCard: React.FC<CompletionCardProps> = ({
     for (let row = 0; row < gridDimensions.M; row++) {
       for (let col = 0; col < gridDimensions.N; col++) {
         const pixel = mappedPixelData[row][col];
-        // 排除透明色和空白区域
+        // 투명 색상 및 빈 영역 제외
         if (pixel.color && 
             pixel.color !== 'transparent' && 
             pixel.color !== 'rgba(0,0,0,0)' &&
@@ -43,20 +43,20 @@ const CompletionCard: React.FC<CompletionCardProps> = ({
     return count;
   }, [mappedPixelData, gridDimensions]);
 
-  // 格式化时间
+  // 시간 형식 변환
   const formatTime = (seconds: number): string => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
     
     if (hours > 0) {
-      return `${hours}小时${minutes}分钟`;
+      return `${hours}시간 ${minutes}분`;
     } else {
-      return `${minutes}分${secs}秒`;
+      return `${minutes}분 ${secs}초`;
     }
   };
 
-  // 生成原图缩略图
+  // 원본 도안 썸네일 생성
   const generateThumbnail = useCallback(() => {
     if (!mappedPixelData) return null;
 
@@ -64,17 +64,17 @@ const CompletionCard: React.FC<CompletionCardProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
-    // 根据实际比例计算缩略图尺寸，保持宽高比
+    // 실제 비율에 따라 썸네일 크기를 계산하여 가로세로 비율 유지
     const aspectRatio = gridDimensions.N / gridDimensions.M;
     const maxThumbnailSize = 200;
     
     let thumbnailWidth, thumbnailHeight;
     if (aspectRatio > 1) {
-      // 宽图
+      // 가로형 이미지
       thumbnailWidth = maxThumbnailSize;
       thumbnailHeight = maxThumbnailSize / aspectRatio;
     } else {
-      // 高图或方图
+      // 세로형 또는 정사각형 이미지
       thumbnailHeight = maxThumbnailSize;
       thumbnailWidth = maxThumbnailSize * aspectRatio;
     }
@@ -85,7 +85,7 @@ const CompletionCard: React.FC<CompletionCardProps> = ({
     const cellWidth = thumbnailWidth / gridDimensions.N;
     const cellHeight = thumbnailHeight / gridDimensions.M;
 
-    // 绘制缩略图
+    // 썸네일 그리기
     for (let row = 0; row < gridDimensions.M; row++) {
       for (let col = 0; col < gridDimensions.N; col++) {
         const pixel = mappedPixelData[row][col];
@@ -102,25 +102,25 @@ const CompletionCard: React.FC<CompletionCardProps> = ({
     return canvas.toDataURL();
   }, [mappedPixelData, gridDimensions]);
 
-  // 开启相机
+  // 카메라 켜기
   const startCamera = async () => {
     try {
       setIsCapturing(true);
       setCameraError(false);
       const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment' } // 后置摄像头
+        video: { facingMode: 'environment' } // 후면 카메라
       });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
     } catch (error) {
-      console.error('无法访问相机:', error);
+      console.error('카메라에 접근할 수 없습니다:', error);
       setIsCapturing(false);
       setCameraError(true);
     }
   };
 
-  // 拍照
+  // 사진 촬영
   const takePhoto = () => {
     if (!videoRef.current || !canvasRef.current) return;
 
@@ -136,13 +136,13 @@ const CompletionCard: React.FC<CompletionCardProps> = ({
     const photoDataURL = canvas.toDataURL('image/jpeg', 0.8);
     setUserPhoto(photoDataURL);
 
-    // 停止相机
+    // 카메라 중지
     const stream = video.srcObject as MediaStream;
     stream?.getTracks().forEach(track => track.stop());
     setIsCapturing(false);
   };
 
-  // 跳过拍照，使用拼豆原图
+  // 사진 촬영을 건너뛰고 펄러비즈 원본 도안 사용
   const skipPhoto = () => {
     const thumbnailDataURL = generateThumbnail();
     if (thumbnailDataURL) {
@@ -150,7 +150,7 @@ const CompletionCard: React.FC<CompletionCardProps> = ({
     }
   };
 
-  // 生成打卡图
+  // 완성 카드 생성
   const generateCompletionCard = useCallback(() => {
     if (!userPhoto || !cardCanvasRef.current) return null;
 
@@ -158,24 +158,24 @@ const CompletionCard: React.FC<CompletionCardProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
-    // 检查是否使用的是拼豆原图（通过比较是否等于generateThumbnail的结果）
+    // 펄러비즈 원본 도안을 사용하는지 확인
     const thumbnailDataURL = generateThumbnail();
     const isUsingPixelArt = userPhoto === thumbnailDataURL;
 
-    // 设置画布尺寸 (3:4比例，适合分享)
+    // 캔버스 크기 설정 (3:4 비율, 공유에 적합)
     const cardWidth = 720;
     const cardHeight = 960;
     canvas.width = cardWidth;
     canvas.height = cardHeight;
 
     return new Promise<string>((resolve) => {
-      // 加载用户照片/拼豆图
+      // 사용자 사진/펄러비즈 도안 불러오기
       const userImg = new Image();
       userImg.onload = () => {
         if (isUsingPixelArt) {
-          // ===== 拼豆原图模式：原图占主导 =====
+          // ===== 펄러비즈 원본 도안 모드: 원본 도안을 중심으로 표시 =====
           
-          // 深色渐变背景，更有质感
+          // 어두운 그라데이션 배경
           const gradient = ctx.createLinearGradient(0, 0, 0, cardHeight);
           gradient.addColorStop(0, '#1a1a2e');
           gradient.addColorStop(0.3, '#16213e');
@@ -184,28 +184,28 @@ const CompletionCard: React.FC<CompletionCardProps> = ({
           ctx.fillStyle = gradient;
           ctx.fillRect(0, 0, cardWidth, cardHeight);
 
-          // 计算拼豆图尺寸，保持原始宽高比
+          // 원본 가로세로 비율을 유지하여 펄러비즈 도안 크기 계산
           const imgAspectRatio = userImg.naturalWidth / userImg.naturalHeight;
           const maxWidth = cardWidth * 0.9;
           const maxHeight = cardHeight * 0.6;
           
           let imageWidth, imageHeight;
           if (maxWidth / maxHeight > imgAspectRatio) {
-            // 以高度为准
+            // 높이를 기준으로 계산
             imageHeight = maxHeight;
             imageWidth = imageHeight * imgAspectRatio;
           } else {
-            // 以宽度为准
+            // 너비를 기준으로 계산
             imageWidth = maxWidth;
             imageHeight = imageWidth / imgAspectRatio;
           }
           
           const imageX = (cardWidth - imageWidth) / 2;
-          const imageY = (cardHeight - imageHeight) / 2 - 80; // 往上偏移更多
+          const imageY = (cardHeight - imageHeight) / 2 - 80; // 조금 더 위로 이동
 
-          // 绘制主图片的装饰背景和阴影
+          // 메인 이미지의 장식 배경 및 그림자 그리기
           ctx.save();
-          // 外层光晕效果
+          // 외곽 광원 효과
           const glowGradient = ctx.createRadialGradient(
             imageX + imageWidth/2, imageY + imageHeight/2, Math.min(imageWidth, imageHeight)/2,
             imageX + imageWidth/2, imageY + imageHeight/2, Math.min(imageWidth, imageHeight)/2 + 30
@@ -215,7 +215,7 @@ const CompletionCard: React.FC<CompletionCardProps> = ({
           ctx.fillStyle = glowGradient;
           ctx.fillRect(imageX - 30, imageY - 30, imageWidth + 60, imageHeight + 60);
           
-          // 白色边框背景
+          // 흰색 테두리 배경
           ctx.fillStyle = '#ffffff';
           ctx.shadowColor = 'rgba(0,0,0,0.3)';
           ctx.shadowBlur = 25;
@@ -226,43 +226,43 @@ const CompletionCard: React.FC<CompletionCardProps> = ({
                       imageWidth + borderWidth * 2, imageHeight + borderWidth * 2);
           ctx.restore();
 
-          // 绘制拼豆原图
+          // 펄러비즈 원본 도안 그리기
           ctx.drawImage(userImg, imageX, imageY, imageWidth, imageHeight);
 
-          // 顶部区域：简洁的完成标识
+          // 상단 영역: 간단한 완성 표시
           ctx.fillStyle = '#ffffff';
           ctx.font = 'bold 28px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
           ctx.textAlign = 'center';
           ctx.shadowColor = 'rgba(0,0,0,0.3)';
           ctx.shadowBlur = 8;
-          ctx.fillText('🎉 作品完成 🎉', cardWidth / 2, 80);
+          ctx.fillText('🎉 작품 완성 🎉', cardWidth / 2, 80);
           ctx.shadowBlur = 0;
 
-          // 底部信息区域：直接显示文字
+          // 하단 정보 영역: 텍스트 직접 표시
           const infoY = imageY + imageHeight + 40;
           
-          // 信息文字 - 一行显示
+          // 정보 텍스트 - 한 줄로 표시
           ctx.fillStyle = '#ffffff';
           ctx.font = 'bold 22px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
           ctx.textAlign = 'center';
           ctx.shadowColor = 'rgba(0,0,0,0.5)';
           ctx.shadowBlur = 8;
-          ctx.fillText(`⏱️ ${formatTime(totalElapsedTime)} | 🔗 完成 ${totalBeads} 颗豆子`, cardWidth / 2, infoY + 40);
+          ctx.fillText(`⏱️ ${formatTime(totalElapsedTime)} | 🔗 비즈 ${totalBeads}개 완성`, cardWidth / 2, infoY + 40);
 
-          // 底部品牌信息
+          // 하단 브랜드 정보
           ctx.font = '14px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
           ctx.fillStyle = 'rgba(255,255,255,0.7)';
-          ctx.fillText('七卡瓦拼豆底稿生成器', cardWidth / 2, cardHeight - 50);
+          ctx.fillText('펄러비즈 도안 생성기', cardWidth / 2, cardHeight - 50);
           ctx.font = '12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
           ctx.fillStyle = 'rgba(255,255,255,0.5)';
-          ctx.fillText('perlerbeadsold.zippland.com', cardWidth / 2, cardHeight - 25);
+          ctx.fillText('perler-beads.heymenshan.workers.dev', cardWidth / 2, cardHeight - 25);
 
           resolve(canvas.toDataURL('image/jpeg', 0.95));
           
         } else {
-          // ===== 用户照片模式：照片占主导 =====
+          // ===== 사용자 사진 모드: 사진을 중심으로 표시 =====
           
-          // 温暖渐变背景
+          // 따뜻한 그라데이션 배경
           const gradient = ctx.createLinearGradient(0, 0, 0, cardHeight);
           gradient.addColorStop(0, '#ff9a9e');
           gradient.addColorStop(0.3, '#fecfef');
@@ -271,18 +271,18 @@ const CompletionCard: React.FC<CompletionCardProps> = ({
           ctx.fillStyle = gradient;
           ctx.fillRect(0, 0, cardWidth, cardHeight);
 
-          // 计算照片尺寸，保持原始宽高比
+          // 원본 가로세로 비율을 유지하여 사진 크기 계산
           const photoAspectRatio = userImg.naturalWidth / userImg.naturalHeight;
           const maxPhotoWidth = cardWidth * 0.85;
           const maxPhotoHeight = cardHeight * 0.6;
           
           let photoWidth, photoHeight;
           if (maxPhotoWidth / maxPhotoHeight > photoAspectRatio) {
-            // 以高度为准
+            // 높이를 기준으로 계산
             photoHeight = maxPhotoHeight;
             photoWidth = photoHeight * photoAspectRatio;
           } else {
-            // 以宽度为准
+            // 너비를 기준으로 계산
             photoWidth = maxPhotoWidth;
             photoHeight = photoWidth / photoAspectRatio;
           }
@@ -290,14 +290,14 @@ const CompletionCard: React.FC<CompletionCardProps> = ({
           const photoX = (cardWidth - photoWidth) / 2;
           const photoY = (cardHeight - photoHeight) / 2 - 80;
 
-          // 绘制照片装饰背景和阴影
+          // 사진 장식 배경 및 그림자 그리기
           ctx.save();
-          // 外层装饰边框
+          // 외곽 장식 테두리
           ctx.strokeStyle = 'rgba(255,255,255,0.8)';
           ctx.lineWidth = 8;
           ctx.strokeRect(photoX - 15, photoY - 15, photoWidth + 30, photoHeight + 30);
           
-          // 内层白色边框背景
+          // 내부 흰색 테두리 배경
           ctx.fillStyle = '#ffffff';
           ctx.shadowColor = 'rgba(0,0,0,0.2)';
           ctx.shadowBlur = 20;
@@ -306,37 +306,35 @@ const CompletionCard: React.FC<CompletionCardProps> = ({
           ctx.fillRect(photoX - 12, photoY - 12, photoWidth + 24, photoHeight + 24);
           ctx.restore();
 
-          // 绘制照片（保持宽高比）
+          // 사진 그리기 (가로세로 비율 유지)
           ctx.drawImage(userImg, photoX, photoY, photoWidth, photoHeight);
 
-
-
-          // 底部信息区域：直接显示文字
+          // 하단 정보 영역: 텍스트 직접 표시
           const infoCardY = photoY + photoHeight + 30;
 
-          // 信息文字 - 一行显示
+          // 정보 텍스트 - 한 줄로 표시
           ctx.fillStyle = '#ffffff';
           ctx.font = 'bold 22px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
           ctx.textAlign = 'center';
           ctx.shadowColor = 'rgba(0,0,0,0.5)';
           ctx.shadowBlur = 8;
-          ctx.fillText(`⏱️ 总用时 ${formatTime(totalElapsedTime)} | 🔗 共完成 ${totalBeads} 颗豆子`, cardWidth / 2, infoCardY + 35);
+          ctx.fillText(`⏱️ 총 소요 시간 ${formatTime(totalElapsedTime)} | 🔗 총 ${totalBeads}개 비즈 완성`, cardWidth / 2, infoCardY + 35);
 
-          // 添加小的拼豆原图作为装饰
+          // 작은 펄러비즈 원본 도안을 장식으로 추가
           if (thumbnailDataURL) {
             const thumbnailImg = new Image();
             thumbnailImg.onload = () => {
-              // 计算小缩略图尺寸，保持比例
+              // 작은 썸네일 크기 계산 (비율 유지)
               const maxThumbSize = 60;
               const thumbAspectRatio = thumbnailImg.naturalWidth / thumbnailImg.naturalHeight;
               
               let thumbWidth, thumbHeight;
               if (thumbAspectRatio > 1) {
-                // 宽图
+                // 가로형 이미지
                 thumbWidth = maxThumbSize;
                 thumbHeight = maxThumbSize / thumbAspectRatio;
               } else {
-                // 高图或方图
+                // 세로형 또는 정사각형 이미지
                 thumbHeight = maxThumbSize;
                 thumbWidth = maxThumbSize * thumbAspectRatio;
               }
@@ -344,47 +342,47 @@ const CompletionCard: React.FC<CompletionCardProps> = ({
               const thumbX = cardWidth / 2 - thumbWidth / 2;
               const thumbY = infoCardY + 80;
               
-              // 绘制小缩略图背景
+              // 작은 썸네일 배경 그리기
               ctx.fillStyle = '#ffffff';
               ctx.shadowColor = 'rgba(0,0,0,0.3)';
               ctx.shadowBlur = 8;
               ctx.fillRect(thumbX - 3, thumbY - 3, thumbWidth + 6, thumbHeight + 6);
               ctx.shadowBlur = 0;
                
-              // 绘制小缩略图（保持宽高比）
+              // 작은 썸네일 그리기 (가로세로 비율 유지)
               ctx.drawImage(thumbnailImg, thumbX, thumbY, thumbWidth, thumbHeight);
                
-              // 缩略图边框
+              // 썸네일 테두리
               ctx.strokeStyle = '#ffffff';
               ctx.lineWidth = 3;
               ctx.strokeRect(thumbX - 3, thumbY - 3, thumbWidth + 6, thumbHeight + 6);
 
-              // 底部品牌信息
+              // 하단 브랜드 정보
               ctx.font = '14px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
               ctx.fillStyle = 'rgba(255,255,255,0.8)';
               ctx.textAlign = 'center';
               ctx.shadowColor = 'rgba(0,0,0,0.5)';
               ctx.shadowBlur = 4;
-              ctx.fillText('七卡瓦拼豆底稿生成器', cardWidth / 2, cardHeight - 40);
+              ctx.fillText('펄러비즈 도안 생성기', cardWidth / 2, cardHeight - 40);
               ctx.font = '12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
               ctx.fillStyle = 'rgba(255,255,255,0.6)';
-              ctx.fillText('perlerbeadsold.zippland.com', cardWidth / 2, cardHeight - 20);
+              ctx.fillText('perler-beads.heymenshan.workers.dev', cardWidth / 2, cardHeight - 20);
               ctx.shadowBlur = 0;
 
               resolve(canvas.toDataURL('image/jpeg', 0.95));
             };
             thumbnailImg.src = thumbnailDataURL;
           } else {
-            // 底部品牌信息
+            // 하단 브랜드 정보
             ctx.font = '14px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
             ctx.fillStyle = 'rgba(255,255,255,0.8)';
             ctx.textAlign = 'center';
             ctx.shadowColor = 'rgba(0,0,0,0.5)';
             ctx.shadowBlur = 4;
-            ctx.fillText('七卡瓦拼豆底稿生成器', cardWidth / 2, cardHeight - 40);
+            ctx.fillText('펄러비즈 도안 생성기', cardWidth / 2, cardHeight - 40);
             ctx.font = '12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
             ctx.fillStyle = 'rgba(255,255,255,0.6)';
-            ctx.fillText('perlerbeadsold.zippland.com', cardWidth / 2, cardHeight - 20);
+            ctx.fillText('perler-beads.heymenshan.workers.dev', cardWidth / 2, cardHeight - 20);
             ctx.shadowBlur = 0;
 
             resolve(canvas.toDataURL('image/jpeg', 0.95));
@@ -395,12 +393,12 @@ const CompletionCard: React.FC<CompletionCardProps> = ({
     });
   }, [userPhoto, totalElapsedTime, generateThumbnail, totalBeads]);
 
-  // 下载打卡图
+  // 완성 카드 다운로드
   const downloadCard = async () => {
     const cardDataURL = await generateCompletionCard();
     if (cardDataURL) {
       const link = document.createElement('a');
-      link.download = `拼豆完成打卡-${new Date().toLocaleDateString()}.jpg`;
+      link.download = `펄러비즈-완성-${new Date().toLocaleDateString()}.jpg`;
       link.href = cardDataURL;
       link.click();
     }
@@ -414,11 +412,11 @@ const CompletionCard: React.FC<CompletionCardProps> = ({
         <div className="p-6">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              🎉 作品完成 🎉
+              🎉 작품 완성 🎉
             </h2>
             <div className="text-gray-600 space-y-1">
-              <p>总用时：{formatTime(totalElapsedTime)}</p>
-              <p>共完成：{totalBeads} 颗豆子</p>
+              <p>총 소요 시간: {formatTime(totalElapsedTime)}</p>
+              <p>완성한 비즈: {totalBeads}개</p>
             </div>
           </div>
 
@@ -427,13 +425,13 @@ const CompletionCard: React.FC<CompletionCardProps> = ({
               {!isCapturing ? (
                 <div>
                   <p className="text-gray-600 mb-4">
-                    拍一张照片生成专属打卡图吧！
+                    사진을 찍어 나만의 완성 카드를 만들어보세요!
                   </p>
                   {cameraError && (
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
                       <p className="text-yellow-800 text-sm">
-                        📱 无法访问相机，可能是权限限制或设备不支持。<br/>
-                        你可以选择使用作品图生成打卡图。
+                        📱 카메라에 접근할 수 없습니다. 권한이 제한되어 있거나 기기에서 지원하지 않을 수 있습니다.<br/>
+                        작품 이미지를 사용하여 완성 카드를 만들 수 있습니다.
                       </p>
                     </div>
                   )}
@@ -442,13 +440,13 @@ const CompletionCard: React.FC<CompletionCardProps> = ({
                       onClick={startCamera}
                       className="w-full bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors"
                     >
-                      📸 开启相机拍照
+                      📸 카메라로 사진 찍기
                     </button>
                     <button
                       onClick={skipPhoto}
                       className="w-full bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors"
                     >
-                      🎨 跳过拍照，使用作品图
+                      🎨 사진 건너뛰고 작품 이미지 사용
                     </button>
                   </div>
                 </div>
@@ -464,7 +462,7 @@ const CompletionCard: React.FC<CompletionCardProps> = ({
                     onClick={takePhoto}
                     className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors mr-2"
                   >
-                    📸 拍照
+                    📸 사진 찍기
                   </button>
                   <button
                     onClick={() => {
@@ -474,7 +472,7 @@ const CompletionCard: React.FC<CompletionCardProps> = ({
                     }}
                     className="bg-gray-500 text-white px-4 py-3 rounded-lg hover:bg-gray-600 transition-colors"
                   >
-                    取消
+                    취소
                   </button>
                 </div>
               )}
@@ -484,7 +482,7 @@ const CompletionCard: React.FC<CompletionCardProps> = ({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={userPhoto}
-                alt="用户照片"
+                alt="사용자 사진"
                 className="w-32 h-32 rounded-full mx-auto mb-4 object-cover"
               />
               <div className="space-y-3">
@@ -492,13 +490,13 @@ const CompletionCard: React.FC<CompletionCardProps> = ({
                   onClick={downloadCard}
                   className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-colors"
                 >
-                  📥 下载打卡图
+                  📥 완성 카드 다운로드
                 </button>
                 <button
                   onClick={() => setUserPhoto(null)}
                   className="w-full bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 transition-colors"
                 >
-                  重新拍照
+                  다시 촬영하기
                 </button>
               </div>
             </div>
@@ -509,17 +507,17 @@ const CompletionCard: React.FC<CompletionCardProps> = ({
               onClick={onClose}
               className="w-full bg-gray-100 text-gray-600 py-2 rounded-lg hover:bg-gray-200 transition-colors"
             >
-              稍后再说
+              나중에 하기
             </button>
           </div>
         </div>
       </div>
 
-      {/* 隐藏的canvas用于生成图片 */}
+      {/* 이미지 생성을 위한 숨겨진 canvas */}
       <canvas ref={canvasRef} style={{ display: 'none' }} />
       <canvas ref={cardCanvasRef} style={{ display: 'none' }} />
     </div>
   );
 };
 
-export default CompletionCard; 
+export default CompletionCard;
