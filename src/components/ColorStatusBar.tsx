@@ -19,12 +19,12 @@ const ColorStatusBar: React.FC<ColorStatusBarProps> = ({
   if (!colorInfo) {
     return (
       <div className="h-12 bg-white border-b border-gray-200 px-4 py-2 flex items-center">
-        <div className="text-gray-500">请选择颜色</div>
+        <div className="text-gray-500">색상을 선택하세요</div>
       </div>
     );
   }
 
-  const estimatedTime = Math.ceil((colorInfo.total - colorInfo.completed) * 0.1); // 假设每个格子0.5分钟
+  const estimatedTime = Math.ceil((colorInfo.total - colorInfo.completed) * 0.1); // 칸당 0.5분으로 가정
 
   return (
     <div className="h-12 bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between">
@@ -41,7 +41,7 @@ const ColorStatusBar: React.FC<ColorStatusBarProps> = ({
             {colorInfo.completed}/{colorInfo.total}
           </div>
           <div className="text-xs text-gray-500">
-            预计还需 {estimatedTime}分钟
+            예상 남은 시간 {estimatedTime}분
           </div>
         </div>
       </div>
