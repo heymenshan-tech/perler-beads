@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { GridDownloadOptions } from '../types/downloadTypes';
 
-// 定义可选的网格线颜色
+// 선택 가능한 그리드 선 색상 정의
 const gridLineColorOptions = [
-  { name: '深灰色', value: '#555555' },
-  { name: '红色', value: '#FF0000' },
-  { name: '蓝色', value: '#0000FF' },
-  { name: '绿色', value: '#008000' },
-  { name: '紫色', value: '#800080' },
-  { name: '橙色', value: '#FFA500' },
+  { name: '진회색', value: '#555555' },
+  { name: '빨간색', value: '#FF0000' },
+  { name: '파란색', value: '#0000FF' },
+  { name: '초록색', value: '#008000' },
+  { name: '보라색', value: '#800080' },
+  { name: '주황색', value: '#FFA500' },
 ];
 
 interface DownloadSettingsModalProps {
@@ -26,13 +26,13 @@ const DownloadSettingsModal: React.FC<DownloadSettingsModalProps> = ({
   onOptionsChange,
   onDownload
 }) => {
-  // 将useState移到顶层，不管isOpen是什么值
+  // isOpen 값과 관계없이 useState를 최상위에서 호출
   const [tempOptions, setTempOptions] = useState<GridDownloadOptions>({...options});
   
-  // 如果不是打开状态，仍然可以返回null
+  // 열려 있지 않은 경우 null 반환
   if (!isOpen) return null;
   
-  // 处理选项变更 - 使用更具体的类型而不是any
+  // 옵션 변경 처리 - any 대신 더 구체적인 타입 사용
   const handleOptionChange = (key: keyof GridDownloadOptions, value: string | number | boolean) => {
     setTempOptions((prev: GridDownloadOptions) => ({
       ...prev,
@@ -40,12 +40,12 @@ const DownloadSettingsModal: React.FC<DownloadSettingsModalProps> = ({
     }));
   };
   
-  // 保存选项并立即使用新设置下载
+  // 옵션을 저장하고 새 설정으로 즉시 다운로드
   const handleSave = () => {
-    // 更新父组件中的设置状态（虽然下载时不依赖这个更新）
+    // 부모 컴포넌트의 설정 상태 업데이트
     onOptionsChange(tempOptions);
     
-    // 直接使用当前临时设置下载，不依赖状态更新
+    // 상태 업데이트에 의존하지 않고 현재 임시 설정으로 바로 다운로드
     onDownload(tempOptions); 
     
     onClose();
@@ -56,7 +56,7 @@ const DownloadSettingsModal: React.FC<DownloadSettingsModalProps> = ({
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden w-full max-w-md">
         <div className="p-5">
           <div className="flex justify-between items-center border-b dark:border-gray-700 pb-3 mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">下载图纸设置</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">도안 다운로드 설정</h3>
             <button 
               onClick={onClose}
               className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
@@ -68,10 +68,10 @@ const DownloadSettingsModal: React.FC<DownloadSettingsModalProps> = ({
           </div>
           
           <div className="space-y-4">
-            {/* 显示网格线选项 */}
+            {/* 그리드 선 표시 옵션 */}
             <div className="flex items-center justify-between">
               <label className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300">
-                显示网格线
+                그리드 선 표시
               </label>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input 
@@ -84,13 +84,13 @@ const DownloadSettingsModal: React.FC<DownloadSettingsModalProps> = ({
               </label>
             </div>
             
-            {/* 网格线设置 (仅当显示网格线时) */}
+            {/* 그리드 선 설정 (그리드 선을 표시할 때만) */}
             {tempOptions.showGrid && (
               <div className="space-y-4 pl-2 border-l-2 border-gray-200 dark:border-gray-700 ml-1 pt-2 pb-1">
-                {/* 网格线间隔选项 */}
+                {/* 그리드 선 간격 옵션 */}
                 <div className="flex flex-col space-y-2">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    网格线间隔 (每 N 格画一条线)
+                    그리드 선 간격 (N칸마다 선 표시)
                   </label>
                   <div className="flex items-center justify-between space-x-3">
                     <input 
@@ -108,10 +108,10 @@ const DownloadSettingsModal: React.FC<DownloadSettingsModalProps> = ({
                   </div>
                 </div>
 
-                {/* 网格线颜色选择 */}
+                {/* 그리드 선 색상 선택 */}
                 <div className="flex flex-col space-y-2">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    网格线颜色
+                    그리드 선 색상
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {gridLineColorOptions.map(colorOpt => (
@@ -136,10 +136,10 @@ const DownloadSettingsModal: React.FC<DownloadSettingsModalProps> = ({
               </div>
             )}
             
-            {/* 显示坐标选项 */}
+            {/* 좌표 표시 옵션 */}
             <div className="flex items-center justify-between">
               <label className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300">
-                显示坐标数字
+                좌표 숫자 표시
               </label>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input 
@@ -152,10 +152,10 @@ const DownloadSettingsModal: React.FC<DownloadSettingsModalProps> = ({
               </label>
             </div>
 
-            {/* 隐藏格内色号选项 */}
+            {/* 칸 내부 색상 코드 숨기기 옵션 */}
             <div className="flex items-center justify-between">
               <label className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300">
-                隐藏格内色号
+                칸 내부 색상 코드 숨기기
               </label>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input 
@@ -168,10 +168,10 @@ const DownloadSettingsModal: React.FC<DownloadSettingsModalProps> = ({
               </label>
             </div>
             
-            {/* 添加: 包含色号统计选项 */}
+            {/* 추가: 색상 코드 통계 포함 옵션 */}
             <div className="flex items-center justify-between">
               <label className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300">
-                包含色号统计
+                색상 코드 통계 포함
               </label>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input 
@@ -184,14 +184,14 @@ const DownloadSettingsModal: React.FC<DownloadSettingsModalProps> = ({
               </label>
             </div>
 
-            {/* 新增: 导出CSV hex数据选项 */}
+            {/* 추가: CSV HEX 데이터 내보내기 옵션 */}
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
                 <label className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300">
-                  同时导出源数据
+                  원본 데이터도 함께 내보내기
                 </label>
                 <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  导出hex颜色值的CSV文件，可用于重新导入
+                  HEX 색상값이 포함된 CSV 파일을 내보냅니다. 다시 가져올 때 사용할 수 있습니다
                 </span>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
@@ -211,13 +211,13 @@ const DownloadSettingsModal: React.FC<DownloadSettingsModalProps> = ({
               onClick={onClose}
               className="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg transition-colors"
             >
-              取消
+              취소
             </button>
             <button
               onClick={handleSave}
               className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
             >
-              下载图纸
+              도안 다운로드
             </button>
           </div>
         </div>
@@ -227,4 +227,4 @@ const DownloadSettingsModal: React.FC<DownloadSettingsModalProps> = ({
 };
 
 export default DownloadSettingsModal;
-export { gridLineColorOptions }; 
+export { gridLineColorOptions };
