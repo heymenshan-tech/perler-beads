@@ -29,11 +29,11 @@ const CelebrationAnimation: React.FC<CelebrationAnimationProps> = ({
   useEffect(() => {
     if (!isVisible) return;
 
-    // emoji和彩带选项
+    // 이모지와 색종이 옵션
     const celebrationEmojis = ['🎉', '🎊', '✨', '🌟', '💫', '🎈', '🎁', '🏆'];
     const confettiColors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
 
-    // 创建emoji粒子
+    // 이모지 파티클 생성
     const newParticles: Particle[] = [];
     for (let i = 0; i < 20; i++) {
       const isFromLeft = Math.random() < 0.5;
@@ -51,7 +51,7 @@ const CelebrationAnimation: React.FC<CelebrationAnimationProps> = ({
       });
     }
 
-    // 创建彩带粒子
+    // 색종이 파티클 생성
     const newConfetti: Particle[] = [];
     for (let i = 0; i < 40; i++) {
       const isFromLeft = Math.random() < 0.5;
@@ -73,7 +73,7 @@ const CelebrationAnimation: React.FC<CelebrationAnimationProps> = ({
     setParticles(newParticles);
     setConfetti(newConfetti);
 
-    // 动画循环
+    // 애니메이션 루프
     let animationId: number;
     const animate = () => {
       setParticles(prev => prev.map(particle => ({
@@ -82,7 +82,7 @@ const CelebrationAnimation: React.FC<CelebrationAnimationProps> = ({
         y: particle.y + particle.vy,
         rotation: particle.rotation + particle.rotationSpeed,
         opacity: Math.max(0, particle.opacity - 0.02),
-        vy: particle.vy + 0.1 // 重力效果
+        vy: particle.vy + 0.1 // 중력 효과
       })).filter(particle => 
         particle.x > -100 && 
         particle.x < window.innerWidth + 100 && 
@@ -96,7 +96,7 @@ const CelebrationAnimation: React.FC<CelebrationAnimationProps> = ({
         y: particle.y + particle.vy,
         rotation: particle.rotation + particle.rotationSpeed,
         opacity: Math.max(0, particle.opacity - 0.015),
-        vy: particle.vy + 0.08 // 稍微轻一点的重力
+        vy: particle.vy + 0.08 // 조금 더 약한 중력
       })).filter(particle => 
         particle.x > -50 && 
         particle.x < window.innerWidth + 50 && 
@@ -109,7 +109,7 @@ const CelebrationAnimation: React.FC<CelebrationAnimationProps> = ({
 
     animate();
 
-    // 1.5秒后清理动画
+    // 1.5초 후 애니메이션 정리
     const timer = setTimeout(() => {
       setParticles([]);
       setConfetti([]);
@@ -126,7 +126,7 @@ const CelebrationAnimation: React.FC<CelebrationAnimationProps> = ({
 
   return (
     <div className="fixed inset-0 pointer-events-none z-50">
-      {/* Emoji 粒子 */}
+      {/* 이모지 파티클 */}
       {particles.map(particle => (
         <div
           key={particle.id}
@@ -143,7 +143,7 @@ const CelebrationAnimation: React.FC<CelebrationAnimationProps> = ({
         </div>
       ))}
 
-      {/* 彩带粒子 */}
+      {/* 색종이 파티클 */}
       {confetti.map(particle => (
         <div
           key={particle.id}
@@ -161,7 +161,7 @@ const CelebrationAnimation: React.FC<CelebrationAnimationProps> = ({
         />
       ))}
 
-      {/* 中央庆祝文字 */}
+      {/* 중앙 축하 문구 */}
       <div 
         className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center animate-bounce"
         style={{
@@ -171,14 +171,14 @@ const CelebrationAnimation: React.FC<CelebrationAnimationProps> = ({
         }}
       >
         <div className="text-4xl font-bold text-yellow-400 drop-shadow-lg animate-pulse">
-          🎉完成🎉
+          🎉완성🎉
         </div>
         <div className="text-lg text-white drop-shadow-md mt-2">
-          这个颜色拼完了！
+          이 색상을 모두 완성했어요!
         </div>
       </div>
     </div>
   );
 };
 
-export default CelebrationAnimation; 
+export default CelebrationAnimation;
