@@ -15,7 +15,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   progressPercentage,
   recommendedCell
 }) => {
-  // 生成7个圆点来表示进度
+  // 진행률을 나타내는 7개의 원형 표시 생성
   const progressDots = Array.from({ length: 7 }, (_, index) => {
     const threshold = (index + 1) * (100 / 7);
     const isFilled = progressPercentage >= threshold;
@@ -41,9 +41,9 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
       
       <div className="text-xs text-gray-500">
         {recommendedCell ? (
-          <span>下一块 → {recommendedCell.row + 1},{recommendedCell.col + 1}</span>
+          <span>다음 칸 → {recommendedCell.row + 1},{recommendedCell.col + 1}</span>
         ) : (
-          <span>已完成当前颜色</span>
+          <span>현재 색상 완성</span>
         )}
       </div>
     </div>
