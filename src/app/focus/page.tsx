@@ -21,48 +21,48 @@ import CompletionCard from '../../components/CompletionCard';
 import { getColorKeyByHex, ColorSystem } from '../../utils/colorSystemUtils';
 
 interface FocusModeState {
-  // 当前状态
+  // 현재 상태
   currentColor: string;
   selectedCell: { row: number; col: number } | null;
   
-  // 画布状态
+  // 캔버스 상태
   canvasScale: number;
   canvasOffset: { x: number; y: number };
   
-  // 进度状态
+  // 진행 상태
   completedCells: Set<string>;
   colorProgress: Record<string, { completed: number; total: number }>;
   
-  // 引导状态 - 改为区域推荐
+  // 안내 상태 - 영역 추천 방식으로 변경
   recommendedRegion: { row: number; col: number }[] | null;
-  recommendedCell: { row: number; col: number } | null; // 保留用于定位显示
+  recommendedCell: { row: number; col: number } | null; // 위치 표시용으로 유지
   guidanceMode: 'nearest' | 'largest' | 'edge-first';
   
-  // UI状态
+  // UI 상태
   showColorPanel: boolean;
   showSettingsPanel: boolean;
   isPaused: boolean;
   
-  // 计时器状态
-  startTime: number; // 开始时间戳
-  totalElapsedTime: number; // 总计用时（秒）
-  lastResumeTime: number; // 最后一次恢复的时间戳
+  // 타이머 상태
+  startTime: number; // 시작 타임스탬프
+  totalElapsedTime: number; // 총 소요 시간(초)
+  lastResumeTime: number; // 마지막으로 재개한 타임스탬프
   
-  // 显示设置
-  gridSectionInterval: number; // 网格分区间隔
-  showSectionLines: boolean; // 是否显示分割线
-  sectionLineColor: string; // 分割线颜色
-  enableCelebration: boolean; // 是否启用庆祝动画
-  showCelebration: boolean; // 是否显示庆祝动画
-  showCompletionCard: boolean; // 是否显示完成打卡图
+  // 표시 설정
+  gridSectionInterval: number; // 그리드 구역 간격
+  showSectionLines: boolean; // 구분선 표시 여부
+  sectionLineColor: string; // 구분선 색상
+  enableCelebration: boolean; // 축하 애니메이션 활성화 여부
+  showCelebration: boolean; // 축하 애니메이션 표시 여부
+  showCompletionCard: boolean; // 완성 카드 표시 여부
 }
 
 export default function FocusMode() {
-  // 从localStorage或URL参数获取像素数据
+  // localStorage 또는 URL 매개변수에서 픽셀 데이터 가져오기
   const [mappedPixelData, setMappedPixelData] = useState<MappedPixel[][] | null>(null);
   const [gridDimensions, setGridDimensions] = useState<{ N: number; M: number } | null>(null);
 
-  // 专心模式状态
+  // 집중 모드 상태
   const [focusState, setFocusState] = useState<FocusModeState>({
     currentColor: '',
     selectedCell: null,
@@ -87,7 +87,7 @@ export default function FocusMode() {
     showCompletionCard: false
   });
 
-  // 可用颜色列表
+  // 사용 가능한 색상 목록
   const [availableColors, setAvailableColors] = useState<Array<{
     color: string;
     name: string;
@@ -95,7 +95,7 @@ export default function FocusMode() {
     completed: number;
   }>>([]);
 
-  // 计时器管理
+  // 타이머 관리
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     
@@ -110,7 +110,7 @@ export default function FocusMode() {
             lastResumeTime: now
           };
         });
-      }, 1000); // 每秒更新一次
+      }, 1000); // 1초마다 업데이트
     }
     
     return () => {
@@ -120,7 +120,7 @@ export default function FocusMode() {
     };
   }, [focusState.isPaused]);
 
-  // 从localStorage加载数据
+  // localStorage에서 데이터 불러오기
   useEffect(() => {
     const savedPixelData = localStorage.getItem('focusMode_pixelData');
     const savedGridDimensions = localStorage.getItem('focusMode_gridDimensions');
@@ -136,23 +136,23 @@ export default function FocusMode() {
         setMappedPixelData(pixelData);
         setGridDimensions(dimensions);
         
-        // 设置色号系统 - 已移除未使用的状态
+        // 색상 코드 시스템 설정 - 사용하지 않는 상태 제거됨
 
-        // 计算颜色进度
+        // 색상 진행 상황 계산
         const colors = Object.entries(colorCounts).map(([, colorData]) => {
           const data = colorData as { color: string; count: number };
-          // 通过hex值获取对应色号系统的色号
+          // HEX 값을 통해 해당 색상 코드 시스템의 색상 코드 가져오기
           const displayKey = getColorKeyByHex(data.color, savedColorSystem as ColorSystem || 'MARD');
           return {
             color: data.color,
-            name: displayKey, // 使用色号系统的色号作为名称
+            name: displayKey, // 색상 코드 시스템의 색상 코드를 이름으로 사용
             total: data.count,
             completed: 0
           };
         });
         setAvailableColors(colors);
 
-        // 设置初始当前颜色
+        // 초기 현재 색상 설정
         if (colors.length > 0) {
           setFocusState(prev => ({
             ...prev,
@@ -165,23 +165,23 @@ export default function FocusMode() {
         }
       } catch (error) {
         console.error('Failed to load focus mode data:', error);
-        // 重定向到主页面
+        // 메인 페이지로 이동
         window.location.href = '/';
       }
     } else {
-      // 没有数据，重定向到主页面
+      // 데이터가 없으면 메인 페이지로 이동
       window.location.href = '/';
     }
   }, []);
 
-  // 计算推荐的下一个区域
+  // 다음 추천 영역 계산
   const calculateRecommendedRegion = useCallback(() => {
     if (!mappedPixelData || !focusState.currentColor) return { region: null, cell: null };
 
-    // 获取当前颜色的所有连通区域
+    // 현재 색상의 모든 연결 영역 가져오기
     const allRegions = getAllConnectedRegions(mappedPixelData, focusState.currentColor);
     
-    // 筛选出未完成的区域
+    // 완료되지 않은 영역만 필터링
     const incompleteRegions = allRegions.filter(region => 
       !isRegionCompleted(region, focusState.completedCells)
     );
@@ -192,10 +192,10 @@ export default function FocusMode() {
 
     let selectedRegion: { row: number; col: number }[];
 
-    // 根据引导模式选择推荐区域
+    // 안내 모드에 따라 추천 영역 선택
     switch (focusState.guidanceMode) {
       case 'nearest':
-        // 找最近的区域（相对于上一个完成的格子或中心点）
+        // 가장 가까운 영역 찾기(마지막으로 완료한 칸 또는 중심점 기준)
         const referencePoint = focusState.selectedCell ?? { 
           row: Math.floor(mappedPixelData.length / 2), 
           col: Math.floor(mappedPixelData[0].length / 2) 
@@ -206,13 +206,13 @@ export default function FocusMode() {
         break;
 
       case 'largest':
-        // 找最大的连通区域
+        // 가장 큰 연결 영역 찾기
         const sortedBySize = sortRegionsBySize(incompleteRegions);
         selectedRegion = sortedBySize[0];
         break;
 
       case 'edge-first':
-        // 优先选择包含边缘格子的区域
+        // 가장자리 칸이 포함된 영역을 우선 선택
         const M = mappedPixelData.length;
         const N = mappedPixelData[0].length;
         const edgeRegions = incompleteRegions.filter(region => 
@@ -233,7 +233,7 @@ export default function FocusMode() {
         selectedRegion = incompleteRegions[0];
     }
 
-    // 计算区域中心作为推荐显示位置
+    // 추천 표시 위치로 사용할 영역의 중심 계산
     const centerCell = getRegionCenter(selectedRegion);
     
     return { 
@@ -242,7 +242,7 @@ export default function FocusMode() {
     };
   }, [mappedPixelData, focusState.currentColor, focusState.completedCells, focusState.selectedCell, focusState.guidanceMode]);
 
-  // 更新推荐区域
+  // 추천 영역 업데이트
   useEffect(() => {
     const { region, cell } = calculateRecommendedRegion();
     setFocusState(prev => ({ 
@@ -252,37 +252,37 @@ export default function FocusMode() {
     }));
   }, [calculateRecommendedRegion]);
 
-  // 处理格子点击 - 改为区域洪水填充标记
+  // 칸 클릭 처리 - 영역 플러드 필 방식으로 표시
   const handleCellClick = useCallback((row: number, col: number) => {
     if (!mappedPixelData) return;
 
     const cellColor = mappedPixelData[row][col].color;
 
-    // 如果点击的是当前颜色的格子，对整个连通区域进行标记
+    // 클릭한 칸이 현재 색상이면 연결된 전체 영역을 표시
     if (cellColor === focusState.currentColor) {
-      // 获取点击位置的连通区域
+      // 클릭한 위치의 연결 영역 가져오기
       const region = getConnectedRegion(mappedPixelData, row, col, focusState.currentColor);
       
       if (region.length === 0) return;
 
       const newCompletedCells = new Set(focusState.completedCells);
       
-      // 检查区域是否已完成
+      // 영역이 이미 완료되었는지 확인
       const isCurrentlyCompleted = isRegionCompleted(region, focusState.completedCells);
       
       if (isCurrentlyCompleted) {
-        // 如果区域已完成，取消整个区域的完成状态
+        // 영역이 이미 완료된 경우 전체 영역의 완료 상태 해제
         region.forEach(({ row: r, col: c }) => {
           newCompletedCells.delete(`${r},${c}`);
         });
       } else {
-        // 如果区域未完成，标记整个区域为完成
+        // 영역이 완료되지 않은 경우 전체 영역을 완료 상태로 표시
         region.forEach(({ row: r, col: c }) => {
           newCompletedCells.add(`${r},${c}`);
         });
       }
 
-      // 更新进度
+      // 진행 상황 업데이트
       const newColorProgress = { ...focusState.colorProgress };
       let colorJustCompleted = false;
       
@@ -296,14 +296,14 @@ export default function FocusMode() {
         
         newColorProgress[focusState.currentColor].completed = newCompleted;
         
-        // 检测颜色是否刚刚完成
+        // 해당 색상이 방금 완성되었는지 확인
         const total = newColorProgress[focusState.currentColor].total;
         if (oldCompleted < total && newCompleted === total && focusState.enableCelebration) {
           colorJustCompleted = true;
         }
       }
 
-      // 检查是否所有颜色都完成了（包括当前刚完成的颜色）
+      // 모든 색상이 완료되었는지 확인(방금 완료된 현재 색상 포함)
       const allColorsCompleted = Object.values(newColorProgress).every(
         progress => progress.completed >= progress.total
       );
@@ -318,7 +318,7 @@ export default function FocusMode() {
           showCelebration: colorJustCompleted
         };
 
-        // 如果所有颜色都完成了，停止计时
+        // 모든 색상이 완료되면 타이머 정지
         if (allColorsCompleted && !prev.isPaused) {
           const elapsed = Math.floor((now - prev.lastResumeTime) / 1000);
           newState = {
@@ -331,7 +331,7 @@ export default function FocusMode() {
         return newState;
       });
 
-      // 更新可用颜色的完成数
+      // 사용 가능한 색상의 완료 개수 업데이트
       setAvailableColors(prev => prev.map(color => {
         if (color.color === focusState.currentColor) {
           return {
@@ -344,48 +344,48 @@ export default function FocusMode() {
     }
   }, [mappedPixelData, focusState.currentColor, focusState.completedCells, focusState.colorProgress, focusState.enableCelebration]);
 
-  // 处理颜色切换
+  // 색상 전환 처리
   const handleColorChange = useCallback((color: string) => {
     setFocusState(prev => ({ ...prev, currentColor: color, showColorPanel: false }));
   }, []);
 
-  // 处理定位到推荐位置
+  // 추천 위치로 이동
   const handleLocateRecommended = useCallback(() => {
     if (!focusState.recommendedCell || !gridDimensions) return;
     
     const { row, col } = focusState.recommendedCell;
     
-    // 计算格子大小（与FocusCanvas中的计算保持一致）
+    // 칸 크기 계산(FocusCanvas의 계산 방식과 동일)
     const cellSize = Math.max(15, Math.min(40, 300 / Math.max(gridDimensions.N, gridDimensions.M)));
     
-    // 计算目标格子在画布上的中心位置（像素坐标）
+    // 대상 칸의 캔버스 중심 위치 계산(픽셀 좌표)
     const targetX = (col + 0.5) * cellSize;
     const targetY = (row + 0.5) * cellSize;
     
-    // 计算画布总尺寸
+    // 캔버스 전체 크기 계산
     const canvasWidth = gridDimensions.N * cellSize;
     const canvasHeight = gridDimensions.M * cellSize;
     
-    // 简单的定位逻辑：
-    // 1. 将目标位置移到画布的中心位置
-    // 2. 考虑缩放的影响
+    // 간단한 위치 이동 로직:
+    // 1. 대상 위치를 캔버스 중앙으로 이동
+    // 2. 확대/축소 영향을 고려
     
-    // 画布中心位置
+    // 캔버스 중심 위치
     const canvasCenterX = canvasWidth / 2;
     const canvasCenterY = canvasHeight / 2;
     
-    // 计算从目标位置到画布中心的偏移量
+    // 대상 위치에서 캔버스 중심까지의 오프셋 계산
     const offsetX = canvasCenterX - targetX;
     const offsetY = canvasCenterY - targetY;
     
-    // 更新状态
+    // 상태 업데이트
     setFocusState(prev => ({
       ...prev,
       canvasOffset: { x: offsetX, y: offsetY }
     }));
   }, [focusState.recommendedCell, gridDimensions]);
 
-  // 格式化时间显示
+  // 시간 표시 형식 지정
   const formatTime = useCallback((seconds: number): string => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -398,19 +398,19 @@ export default function FocusMode() {
     }
   }, []);
 
-  // 处理暂停/继续
+  // 일시정지/계속 처리
   const handlePauseToggle = useCallback(() => {
     setFocusState(prev => {
       const now = Date.now();
       if (prev.isPaused) {
-        // 从暂停恢复：重新设置恢复时间
+        // 일시정지에서 재개: 재개 시간 다시 설정
         return {
           ...prev,
           isPaused: false,
           lastResumeTime: now
         };
       } else {
-        // 暂停：累加当前的时间段到总时间
+        // 일시정지: 현재 시간 구간을 총 소요 시간에 추가
         const elapsed = Math.floor((now - prev.lastResumeTime) / 1000);
         return {
           ...prev,
@@ -421,26 +421,26 @@ export default function FocusMode() {
     });
   }, []);
 
-  // 处理庆祝动画完成
+  // 축하 애니메이션 완료 처리
   const handleCelebrationComplete = useCallback(() => {
     setFocusState(prev => ({ ...prev, showCelebration: false }));
     
-    // 检查是否所有颜色都完成了
+    // 모든 색상이 완료되었는지 확인
     const allCompleted = availableColors.every(color => color.completed >= color.total);
     
     if (allCompleted) {
-      // 所有颜色都完成了，显示打卡图
+      // 모든 색상이 완료되었으면 완성 카드 표시
       setFocusState(prev => ({ ...prev, showCompletionCard: true }));
     } else {
-      // 查找下一个未完成的颜色
+      // 다음 미완성 색상 찾기
       const currentIndex = availableColors.findIndex(color => color.color === focusState.currentColor);
       if (currentIndex !== -1) {
-        // 从当前颜色的下一个开始寻找未完成的颜色
+        // 현재 색상의 다음 색상부터 미완성 색상 찾기
         for (let i = 1; i < availableColors.length; i++) {
           const nextIndex = (currentIndex + i) % availableColors.length;
           const nextColor = availableColors[nextIndex];
           
-          // 如果找到未完成的颜色，切换到该颜色
+          // 미완성 색상을 찾으면 해당 색상으로 전환
           if (nextColor.completed < nextColor.total) {
             setFocusState(prev => ({ ...prev, currentColor: nextColor.color }));
             break;
@@ -450,7 +450,7 @@ export default function FocusMode() {
     }
   }, [availableColors, focusState.currentColor]);
 
-  // 处理打卡图关闭
+  // 완성 카드 닫기 처리
   const handleCompletionCardClose = useCallback(() => {
     setFocusState(prev => ({ ...prev, showCompletionCard: false }));
   }, []);
@@ -460,7 +460,7 @@ export default function FocusMode() {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">加载中...</p>
+          <p className="text-gray-600">불러오는 중...</p>
         </div>
       </div>
     );
@@ -472,7 +472,7 @@ export default function FocusMode() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
-      {/* 顶部导航栏 */}
+      {/* 상단 내비게이션 바 */}
       <header className="h-15 bg-white shadow-sm border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         <button 
           onClick={() => window.history.back()}
@@ -481,9 +481,9 @@ export default function FocusMode() {
           <svg className="w-6 h-6 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          返回
+          돌아가기
         </button>
-        <h1 className="text-lg font-medium text-gray-800">专心拼豆（AlphaTest）</h1>
+        <h1 className="text-lg font-medium text-gray-800">집중 펄러비즈 (AlphaTest)</h1>
         <button 
           onClick={() => setFocusState(prev => ({ ...prev, showSettingsPanel: true }))}
           className="text-gray-600 hover:text-gray-800"
@@ -495,14 +495,14 @@ export default function FocusMode() {
         </button>
       </header>
 
-      {/* 当前颜色状态栏 */}
+      {/* 현재 색상 상태 표시줄 */}
       <ColorStatusBar 
         currentColor={focusState.currentColor}
         colorInfo={currentColorInfo}
         progressPercentage={progressPercentage}
       />
 
-      {/* 主画布区域 */}
+      {/* 메인 캔버스 영역 */}
       <div className="flex-1 relative overflow-hidden">
         <FocusCanvas
           mappedPixelData={mappedPixelData}
@@ -522,14 +522,14 @@ export default function FocusMode() {
         />
       </div>
 
-      {/* 快速进度条 */}
+      {/* 빠른 진행률 표시줄 */}
       <ProgressBar 
         progressPercentage={progressPercentage}
         recommendedCell={focusState.recommendedCell}
         colorInfo={currentColorInfo}
       />
 
-      {/* 底部工具栏 */}
+      {/* 하단 도구 모음 */}
       <ToolBar 
         onColorSelect={() => setFocusState(prev => ({ ...prev, showColorPanel: true }))}
         onLocate={handleLocateRecommended}
@@ -538,7 +538,7 @@ export default function FocusMode() {
         elapsedTime={formatTime(focusState.totalElapsedTime)}
       />
 
-      {/* 颜色选择面板 */}
+      {/* 색상 선택 패널 */}
       {focusState.showColorPanel && (
         <ColorPanel
           colors={availableColors}
@@ -548,7 +548,7 @@ export default function FocusMode() {
         />
       )}
 
-      {/* 设置面板 */}
+      {/* 설정 패널 */}
       {focusState.showSettingsPanel && (
         <SettingsPanel
           guidanceMode={focusState.guidanceMode}
@@ -565,13 +565,13 @@ export default function FocusMode() {
         />
       )}
 
-      {/* 庆祝动画 */}
+      {/* 축하 애니메이션 */}
       <CelebrationAnimation
         isVisible={focusState.showCelebration}
         onComplete={handleCelebrationComplete}
       />
 
-      {/* 完成打卡图 */}
+      {/* 완성 카드 */}
       <CompletionCard
         isVisible={focusState.showCompletionCard}
         mappedPixelData={mappedPixelData}
