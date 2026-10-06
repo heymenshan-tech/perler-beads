@@ -1,7 +1,7 @@
 {
-  "name": "七卡瓦拼豆底稿生成器",
-  "short_name": "七卡瓦",
-  "description": "七卡瓦拼豆底稿生成器，让你轻松制作精美的像素画作品",
+  "name": "Qiao Yi 핀또우 도안 생성기",
+  "short_name": "Qiao Yi",
+  "description": "Qiao Yi 핀또우 도안 생성기로 멋진 픽셀아트 작품을 쉽고 간편하게 만들어보세요",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#E8F4FD",
@@ -45,5 +45,5 @@
     }
   ],
   "categories": ["utilities", "productivity"],
-  "lang": "zh-CN"
+  "lang": "ko"
 }
