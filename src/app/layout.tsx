@@ -14,13 +14,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Perler Beads Generator",
+  title: "펄러비즈 도안 생성기",
   description: "이미지를 업로드하고 정밀도를 조절하면, 클릭 한 번으로 픽셀아트 도안을 생성할 수 있는 간단하고 실용적인 픽셀아트 생성 도구",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "핀또우 도안 생성기",
+    title: "펄러비즈 도안 생성기",
   },
   icons: {
     icon: [
@@ -47,7 +47,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="">
+    <html lang="ko" className="">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100`}
       >
