@@ -27,21 +27,21 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   onEnableCelebrationChange,
   onClose
 }) => {
-  // 分割线颜色选项
+  // 구분선 색상 옵션
   const sectionLineColors = [
-    { color: '#007acc', name: '蓝色' },
-    { color: '#28a745', name: '绿色' },
-    { color: '#dc3545', name: '红色' },
-    { color: '#6f42c1', name: '紫色' },
-    { color: '#fd7e14', name: '橙色' },
-    { color: '#6c757d', name: '灰色' }
+    { color: '#007acc', name: '파란색' },
+    { color: '#28a745', name: '초록색' },
+    { color: '#dc3545', name: '빨간색' },
+    { color: '#6f42c1', name: '보라색' },
+    { color: '#fd7e14', name: '주황색' },
+    { color: '#6c757d', name: '회색' }
   ];
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-end">
       <div className="w-80 max-w-[90vw] h-full bg-white shadow-lg flex flex-col">
-        {/* 头部 */}
+        {/* 헤더 */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 className="text-lg font-medium text-gray-800">设置</h2>
+          <h2 className="text-lg font-medium text-gray-800">설정</h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
@@ -52,11 +52,11 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
           </button>
         </div>
 
-        {/* 设置内容 */}
+        {/* 설정 내용 */}
         <div className="flex-1 overflow-y-auto p-4 space-y-6">
-          {/* 引导设置 */}
+          {/* 안내 설정 */}
           <div>
-            <h3 className="text-base font-medium text-gray-800 mb-3">智能引导</h3>
+            <h3 className="text-base font-medium text-gray-800 mb-3">스마트 안내</h3>
             <div className="space-y-3">
               <label className="flex items-center">
                 <input
@@ -68,8 +68,8 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   className="mr-3 text-blue-600"
                 />
                 <div>
-                  <div className="text-sm font-medium text-gray-700">最近优先</div>
-                  <div className="text-xs text-gray-500">推荐距离最近的格子</div>
+                  <div className="text-sm font-medium text-gray-700">가까운 칸 우선</div>
+                  <div className="text-xs text-gray-500">가장 가까운 칸을 우선 추천합니다</div>
                 </div>
               </label>
 
@@ -83,8 +83,8 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   className="mr-3 text-blue-600"
                 />
                 <div>
-                  <div className="text-sm font-medium text-gray-700">大块优先</div>
-                  <div className="text-xs text-gray-500">优先推荐大色块区域</div>
+                  <div className="text-sm font-medium text-gray-700">큰 영역 우선</div>
+                  <div className="text-xs text-gray-500">큰 색상 영역을 우선 추천합니다</div>
                 </div>
               </label>
 
@@ -98,22 +98,22 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   className="mr-3 text-blue-600"
                 />
                 <div>
-                  <div className="text-sm font-medium text-gray-700">边缘优先</div>
-                  <div className="text-xs text-gray-500">先完成边缘，再填充内部</div>
+                  <div className="text-sm font-medium text-gray-700">가장자리 우선</div>
+                  <div className="text-xs text-gray-500">가장자리를 먼저 완성한 후 내부를 채웁니다</div>
                 </div>
               </label>
             </div>
           </div>
 
-          {/* 显示设置 */}
+          {/* 표시 설정 */}
           <div>
-            <h3 className="text-base font-medium text-gray-800 mb-3">显示设置</h3>
+            <h3 className="text-base font-medium text-gray-800 mb-3">표시 설정</h3>
             <div className="space-y-4">
-              {/* 分割线开关 */}
+              {/* 구분선 표시 설정 */}
               <label className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm font-medium text-gray-700">显示分割线</div>
-                  <div className="text-xs text-gray-500">将画布分割成区块帮助定位</div>
+                  <div className="text-sm font-medium text-gray-700">구분선 표시</div>
+                  <div className="text-xs text-gray-500">도안을 여러 구역으로 나누어 위치를 쉽게 찾을 수 있습니다</div>
                 </div>
                 <input
                   type="checkbox"
@@ -123,13 +123,13 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 />
               </label>
 
-              {/* 只有开启分割线时才显示后续选项 */}
+              {/* 구분선을 활성화한 경우에만 아래 옵션 표시 */}
               {showSectionLines && (
                 <>
-                  {/* 分割线间隔 */}
+                  {/* 구분선 간격 */}
                   <div>
                     <label className="text-sm font-medium text-gray-700 block mb-2">
-                      分割间隔
+                      구분 간격
                     </label>
                     <div className="flex items-center space-x-3">
                       <input
@@ -141,15 +141,15 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                         className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                       />
                       <span className="text-sm font-medium text-gray-700 min-w-[3rem]">
-                        {gridSectionInterval} 格
+                        {gridSectionInterval}칸
                       </span>
                     </div>
                   </div>
 
-                  {/* 分割线颜色 */}
+                  {/* 구분선 색상 */}
                   <div>
                     <label className="text-sm font-medium text-gray-700 block mb-2">
-                      分割线颜色
+                      구분선 색상
                     </label>
                     <div className="flex gap-2 flex-wrap">
                       {sectionLineColors.map((colorOption) => (
@@ -170,11 +170,11 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 </>
               )}
 
-              {/* 庆祝动画开关 */}
+              {/* 축하 애니메이션 설정 */}
               <label className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm font-medium text-gray-700">庆祝动画</div>
-                  <div className="text-xs text-gray-500">完成颜色时显示撒花效果</div>
+                  <div className="text-sm font-medium text-gray-700">축하 애니메이션</div>
+                  <div className="text-xs text-gray-500">색상을 완성하면 축하 효과를 표시합니다</div>
                 </div>
                 <input
                   type="checkbox"
@@ -186,31 +186,29 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             </div>
           </div>
 
-
-
-          {/* 进度重置 */}
+          {/* 진행 상황 초기화 */}
           <div>
-            <h3 className="text-base font-medium text-gray-800 mb-3">数据管理</h3>
+            <h3 className="text-base font-medium text-gray-800 mb-3">데이터 관리</h3>
             <div className="space-y-3">
               <button className="w-full py-2 px-4 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors text-sm">
-                导出进度数据
+                진행 데이터 내보내기
               </button>
               
               <button className="w-full py-2 px-4 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm">
-                重置所有进度
+                모든 진행 상황 초기화
               </button>
             </div>
           </div>
 
-          {/* 关于信息 */}
+          {/* 정보 */}
           <div>
-            <h3 className="text-base font-medium text-gray-800 mb-3">关于</h3>
+            <h3 className="text-base font-medium text-gray-800 mb-3">정보</h3>
             <div className="text-sm text-gray-600 space-y-2">
-              <p>专心拼豆模式 v1.0</p>
-              <p>专为手机设计的拼豆助手</p>
+              <p>집중 펄러비즈 모드 v1.0</p>
+              <p>모바일에 최적화된 펄러비즈 작업 도우미</p>
               <div className="pt-2 text-xs text-gray-500">
-                <p>💡 提示：长按格子可以快速标记</p>
-                <p>💡 提示：双指缩放可以查看细节</p>
+                <p>💡 팁: 칸을 길게 누르면 빠르게 표시할 수 있습니다</p>
+                <p>💡 팁: 두 손가락으로 확대하여 세부 내용을 확인할 수 있습니다</p>
               </div>
             </div>
           </div>
