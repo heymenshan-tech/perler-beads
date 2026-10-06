@@ -181,10 +181,6 @@ export default function Home() {
 
   // 新增：专心拼豆模式进入前下载提醒弹窗
   const [isFocusModePreDownloadModalOpen, setIsFocusModePreDownloadModalOpen] = useState<boolean>(false);
-
-  // 新增：横屏设备弹窗状态
-  const [showDesktopModal, setShowDesktopModal] = useState<boolean>(false);
-
   // 新增：编辑撤回历史栈（多步）
   interface EditSnapshot {
     mappedPixelData: MappedPixel[][];
@@ -193,7 +189,7 @@ export default function Home() {
   }
   const [editHistory, setEditHistory] = useState<EditSnapshot[]>([]);
 
-  // 新增：一键去背景撤回快照（单步）
+  // 新增：원클릭 배경 제거撤回快照（单步）
   const [bgRemovalSnapshot, setBgRemovalSnapshot] = useState<EditSnapshot | null>(null);
 
   // 新增：轻量提示
@@ -244,17 +240,17 @@ export default function Home() {
     setColorCounts(snapshot.colorCounts);
     setTotalBeadCount(snapshot.totalBeadCount);
     setEditHistory(prev => prev.slice(0, -1));
-    showToast('已撤回上一步');
+    showToast('이전 단계로 되돌렸습니다');
   }, [editHistory, showToast]);
 
-  // 一键去背景单步撤回
+  // 원클릭 배경 제거单步撤回
   const handleUndoBgRemoval = useCallback(() => {
     if (!bgRemovalSnapshot) return;
     setMappedPixelData(bgRemovalSnapshot.mappedPixelData);
     setColorCounts(bgRemovalSnapshot.colorCounts);
     setTotalBeadCount(bgRemovalSnapshot.totalBeadCount);
     setBgRemovalSnapshot(null);
-    showToast('已撤回背景去除');
+    showToast('배경 제거를 되돌렸습니다');
   }, [bgRemovalSnapshot, showToast]);
 
   // 清空编辑历史（参数变化、退出编辑模式等时调用）
@@ -516,7 +512,7 @@ export default function Home() {
         setExcludedColorKeys(new Set()); // ++ 重置排除列表 ++
         processFile(file);
       } else {
-        alert(`不支持的文件类型: ${file.type || '未知'}。请选择 JPG、PNG、GIF 格式的图片文件，或 CSV 数据文件。\n文件名: ${file.name}`);
+        alert(`지원하지 않는 파일 형식입니다: ${file.type || '알 수 없음'}. JPG, PNG, GIF 이미지 또는 CSV 데이터 파일을 선택해 주세요.\n파일명: ${file.name}`);
         console.warn(`Unsupported file type: ${file.type}, file name: ${file.name}`);
       }
     }
@@ -550,13 +546,13 @@ export default function Home() {
           setExcludedColorKeys(new Set()); // ++ 重置排除列表 ++
           processFile(file);
         } else {
-          alert(`不支持的文件类型: ${file.type || '未知'}。请拖放 JPG、PNG、GIF 格式的图片文件，或 CSV 数据文件。\n文件名: ${file.name}`);
+          alert(`지원하지 않는 파일 형식입니다: ${file.type || '알 수 없음'}. JPG, PNG, GIF 이미지 또는 CSV 데이터 파일을 끌어다 놓아 주세요.\n파일명: ${file.name}`);
           console.warn(`Unsupported file type: ${file.type}, file name: ${file.name}`);
         }
       }
     } catch (error) {
       console.error("处理拖拽文件时发生错误:", error);
-      alert("处理文件时发生错误，请重试。");
+      alert("파일 처리 중 오류가 발생했습니다. 다시 시도해 주세요.");
     }
   };
 
@@ -656,11 +652,11 @@ export default function Home() {
           setGranularity(gridDimensions.N);
           setGranularityInput(gridDimensions.N.toString());
           
-          alert(`成功导入CSV文件！图纸尺寸：${gridDimensions.N}x${gridDimensions.M}，共使用${Object.keys(colorCountsMap).length}种颜色。`);
+          alert(`CSV 파일을 불러왔습니다! 도안 크기: ${gridDimensions.N}x${gridDimensions.M}, 총 ${Object.keys(colorCountsMap).length}가지 색상을 사용합니다.`);
         })
         .catch(error => {
           console.error('CSV导入失败:', error);
-          alert(`CSV导入失败：${error.message}`);
+          alert(`CSV 불러오기에 실패했습니다: ${error.message}`);
         });
     } else {
       // 处理图片文件
@@ -695,7 +691,7 @@ export default function Home() {
           })
           .catch((error) => {
             console.error('GIF 处理失败:', error);
-            alert('无法读取 GIF 文件。');
+            alert('GIF 파일을 읽을 수 없습니다.');
             setInitialGridColorKeys(new Set());
           });
       } else {
@@ -705,7 +701,7 @@ export default function Home() {
         };
         reader.onerror = () => {
           console.error("文件读取失败");
-          alert("无法读取文件。");
+          alert("파일을 읽을 수 없습니다.");
           setInitialGridColorKeys(new Set()); // ++ 重置初始键 ++
         };
         reader.readAsDataURL(file);
@@ -828,7 +824,7 @@ export default function Home() {
 
     if (currentPalette.length === 0) {
         console.error("Cannot pixelate: The selected color palette is empty (likely due to exclusions).");
-        alert("错误：当前可用颜色板为空（可能所有颜色都被排除了），无法处理图像。请尝试恢复部分颜色。");
+        alert("오류: 현재 사용할 수 있는 색상 팔레트가 비어 있어 이미지를 처리할 수 없습니다. 제외한 색상 중 일부를 복원해 주세요.");
         // Clear previous results visually
         pixelatedCtx.clearRect(0, 0, pixelatedCanvas.width, pixelatedCanvas.height);
         setMappedPixelData(null);
@@ -847,7 +843,7 @@ export default function Home() {
     
     img.onerror = (error: Event | string) => {
       console.error("Image loading failed:", error); 
-      alert("无法加载图片。");
+      alert("이미지를 불러올 수 없습니다.");
       setOriginalImageSrc(null); 
       setMappedPixelData(null); 
       setGridDimensions(null); 
@@ -1077,7 +1073,7 @@ export default function Home() {
             pixelatedCtx.fillStyle = '#6b7280'; // gray-500
             pixelatedCtx.font = '16px sans-serif';
             pixelatedCtx.textAlign = 'center';
-            pixelatedCtx.fillText('无可用颜色，请恢复部分排除的颜色', pixelatedCanvas.width / 2, pixelatedCanvas.height / 2);
+            pixelatedCtx.fillText('사용 가능한 색상이 없습니다. 제외한 색상 중 일부를 복원해 주세요.', pixelatedCanvas.width / 2, pixelatedCanvas.height / 2);
         }
         setMappedPixelData(null);
         setGridDimensions(null);
@@ -1104,57 +1100,6 @@ export default function Home() {
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
-  // 强制显示专业工作台弹窗（每次进入页面都弹，引导用户前往新版）
-  useEffect(() => {
-    setShowDesktopModal(true);
-  }, []);
-
-  // 添加URL重定向检查
-  useEffect(() => {
-    // 检查是否在浏览器环境中
-    if (typeof window !== 'undefined') {
-      const currentUrl = window.location.href;
-      const currentHostname = window.location.hostname;
-      const targetDomain = 'https://perlerbeadsold.zippland.com/';
-      
-      // 排除localhost和127.0.0.1等本地开发环境
-      const isLocalhost = currentHostname === 'localhost' || 
-                         currentHostname === '127.0.0.1' || 
-                         currentHostname.startsWith('192.168.') ||
-                         currentHostname.startsWith('10.') ||
-                         currentHostname.endsWith('.local');
-      
-      // 检查当前URL是否不是目标域名，且不是本地开发环境
-      if (!currentUrl.startsWith(targetDomain) && !isLocalhost) {
-        console.log(`当前URL: ${currentUrl}`);
-        console.log(`目标URL: ${targetDomain}`);
-        console.log('正在重定向到官方域名...');
-        
-        // 保留当前路径和查询参数
-        const currentPath = window.location.pathname;
-        const currentSearch = window.location.search;
-        const currentHash = window.location.hash;
-        
-        // 构建完整的目标URL
-        let redirectUrl = targetDomain;
-        
-        // 如果不是根路径，添加路径
-        if (currentPath && currentPath !== '/') {
-          redirectUrl = redirectUrl.replace(/\/$/, '') + currentPath;
-        }
-        
-        // 添加查询参数和哈希
-        redirectUrl += currentSearch + currentHash;
-        
-        // 执行重定向
-        window.location.replace(redirectUrl);
-      } else if (isLocalhost) {
-        console.log(`检测到本地开发环境 (${currentHostname})，跳过重定向`);
-      }
-    }
-  }, []); // 只在组件首次挂载时执行
-
     // --- Download function (ensure filename includes palette) ---
     const handleDownloadRequest = (options?: GridDownloadOptions) => {
         // 调用移动到utils/imageDownloader.ts中的downloadImage函数
@@ -1180,7 +1125,7 @@ export default function Home() {
             // --- 确保初始颜色键已记录 ---
             if (initialGridColorKeys.size === 0) {
                 console.error("Cannot exclude color: Initial grid color keys not yet calculated.");
-                alert("无法排除颜色，初始颜色数据尚未准备好，请稍候。");
+                alert("색상을 제외할 수 없습니다. 초기 색상 데이터가 아직 준비되지 않았습니다. 잠시 기다려 주세요.");
                 return;
             }
             console.log("Initial Grid Hex Keys:", Array.from(initialGridColorKeys));
@@ -1212,7 +1157,7 @@ export default function Home() {
             // 5. *** 关键检查 ***：如果在考虑所有排除项后，没有*初始*颜色可供映射，则阻止此次排除
             if (remapTargetPalette.length === 0) {
                 console.warn(`Cannot exclude color '${hexKey}'. No other valid colors from the initial grid remain after considering all current exclusions.`);
-                alert(`无法排除颜色 ${hexKey}，因为图中最初存在的其他可用颜色也已被排除。请先恢复部分其他颜色。`);
+                alert(`${hexKey} 색상을 제외할 수 없습니다. 이미지에 있던 다른 사용 가능한 색상도 모두 제외되어 있습니다. 먼저 다른 색상 일부를 복원해 주세요.`);
                 console.log("---------");
                 return; // 停止排除过程
             }
@@ -1223,7 +1168,7 @@ export default function Home() {
             // 检查排除颜色的数据是否存在
              if (!excludedColorData || !mappedPixelData || !gridDimensions) {
                  console.error("Cannot exclude color: Missing data for remapping.");
-                 alert("无法排除颜色，缺少必要数据。");
+                 alert("필요한 데이터가 없어 색상을 제외할 수 없습니다.");
                 console.log("---------");
                  return;
              }
@@ -1302,10 +1247,10 @@ export default function Home() {
         setBgRemovalSnapshot(null);
     };
 
-  // 一键去背景：识别边缘主色并洪水填充去除
+  // 원클릭 배경 제거：识别边缘主色并洪水填充去除
   const handleAutoRemoveBackground = () => {
     if (!mappedPixelData || !gridDimensions) {
-      alert('请先生成图纸后再使用一键去背景。');
+      alert('먼저 도안을 생성한 후 원클릭 배경 제거를 사용해 주세요.');
       return;
     }
 
@@ -1337,7 +1282,7 @@ export default function Home() {
     }
 
     if (borderCounts.size === 0) {
-      alert('边缘没有可识别的背景颜色。');
+      alert('가장자리에서 인식할 수 있는 배경색을 찾지 못했습니다.');
       return;
     }
 
@@ -1374,7 +1319,7 @@ export default function Home() {
     }
 
     if (stack.length === 0) {
-      alert('未找到可去除的背景区域。');
+      alert('제거할 수 있는 배경 영역을 찾지 못했습니다.');
       return;
     }
 
@@ -1703,7 +1648,7 @@ export default function Home() {
       .map(([hexValue]) => hexValue);
 
     if (selectedHexValues.length === 0) {
-      alert("当前没有选中的颜色，无法导出。");
+      alert("현재 선택된 색상이 없어 내보낼 수 없습니다.");
       return;
     }
 
@@ -1739,7 +1684,7 @@ export default function Home() {
 
         // 检查文件格式
         if (!Array.isArray(data.selectedHexValues)) {
-          throw new Error("无效的文件格式：文件必须包含 'selectedHexValues' 数组。");
+          throw new Error("잘못된 파일 형식입니다. 파일에 'selectedHexValues' 배열이 포함되어 있어야 합니다.");
         }
 
         console.log("检测到基于hex值的色板文件");
@@ -1761,11 +1706,11 @@ export default function Home() {
 
         if (invalidHexValues.length > 0) {
           console.warn("导入时发现无效的hex值:", invalidHexValues);
-          alert(`导入完成，但以下颜色无效已被忽略：\n${invalidHexValues.join(', ')}`);
+          alert(`불러오기가 완료되었지만 다음 유효하지 않은 색상은 제외되었습니다:\n${invalidHexValues.join(', ')}`);
         }
 
         if (validHexValues.length === 0) {
-          alert("导入的文件中不包含任何有效的颜色。");
+          alert("불러온 파일에 유효한 색상이 없습니다.");
           return;
         }
 
@@ -1776,11 +1721,11 @@ export default function Home() {
         const newSelections = presetToSelections(allHexValues, validHexValues);
         setCustomPaletteSelections(newSelections);
         setIsCustomPalette(true); // 标记为自定义
-        alert(`成功导入 ${validHexValues.length} 个颜色！`);
+        alert(`${validHexValues.length}개의 색상을 불러왔습니다!`);
 
       } catch (error) {
         console.error("导入色板配置失败:", error);
-        alert(`导入失败: ${error instanceof Error ? error.message : '未知错误'}`);
+        alert(`불러오기에 실패했습니다: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
       } finally {
         // 重置文件输入，以便可以再次导入相同的文件
         if (event.target) {
@@ -1789,7 +1734,7 @@ export default function Home() {
       }
     };
     reader.onerror = () => {
-      alert("读取文件失败。");
+      alert("파일을 읽지 못했습니다.");
        // 重置文件输入
       if (event.target) {
         event.target.value = '';
@@ -2079,10 +2024,10 @@ export default function Home() {
 
             {/* Ultra fancy brand name and tool name with hyper cute decorations */}
             <div className="relative flex flex-col items-center space-y-3">
-              {/* Brand name - 七卡瓦 with ultra fancy effects */}
+              {/* Brand name - 치카와 with ultra fancy effects */}
               <div className="relative">
                 <h1 className="relative text-4xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 via-blue-500 to-cyan-400 tracking-wider drop-shadow-2xl transform hover:scale-105 transition-transform duration-300">
-                  七卡瓦
+                  치카와
                 </h1>
                 
                 {/* Super fancy geometric decorations */}
@@ -2102,11 +2047,11 @@ export default function Home() {
                 <div className="absolute bottom-1 right-0 w-1 h-1 bg-purple-300 rounded-full animate-pulse delay-1000"></div>
               </div>
               
-              {/* Tool name - 拼豆底稿生成器 with hyper cute style */}
+              {/* Tool name - 펄러비즈 도안 생성기 with hyper cute style */}
               <div className="relative">
                 <h2 className="relative text-xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-teal-500 via-green-500 to-emerald-400 tracking-widest transform hover:scale-102 transition-all duration-300">
-                  拼豆底稿生成器
-                  <span className="text-xs font-normal text-gray-400 dark:text-gray-500 tracking-widest ml-1 align-middle">竖屏版</span>
+                  펄러비즈 도안 생성기
+                  <span className="text-xs font-normal text-gray-400 dark:text-gray-500 tracking-widest ml-1 align-middle">세로 화면 버전</span>
                 </h2>
                 
                 {/* Super cute geometric shapes */}
@@ -2155,79 +2100,11 @@ export default function Home() {
           </div>
           {/* Slogan */}
           <p className="mt-3 text-sm sm:text-base font-light text-gray-500 dark:text-gray-400 text-center tracking-[0.15em]">
-            让像素创意属于每一个人
+            누구나 픽셀 아트를 즐길 수 있도록
           </p>
 
-          {/* 横屏设备弹窗 */}
-          {showDesktopModal && (
-            <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowDesktopModal(false)}>
-              <div className="relative mx-4 w-full max-w-md rounded-2xl border border-blue-200 dark:border-blue-700 bg-white dark:bg-gray-800 p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
-                <button
-                  onClick={() => setShowDesktopModal(false)}
-                  className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-                    <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
-                  </svg>
-                </button>
-                <div className="flex flex-col items-center text-center">
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/40">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-6 h-6 text-blue-500 dark:text-blue-300">
-                      <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v8a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm1 0v8h12V4H4zm-1 12a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">专业工作台已上线</h3>
-                  <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">专业工作台拥有更完整的功能和更好的操作体验，推荐前往使用。</p>
-                  <div className="mt-5 flex w-full gap-3">
-                    <button
-                      onClick={() => setShowDesktopModal(false)}
-                      className="flex-1 rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                    >
-                      留在此页
-                    </button>
-                    <a
-                      href="https://perlerbeads.zippland.com/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
-                    >
-                      前往专业工作台
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                        <path fillRule="evenodd" d="M3 10a1 1 0 011-1h9.586L11.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L13.586 11H4a1 1 0 01-1-1z" clipRule="evenodd" />
-                      </svg>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 链接行：专业工作台· 小红书 · GitHub */}
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-2.5 text-xs">
-            <a href="https://perlerbeads.zippland.com/" target="_blank" rel="noopener noreferrer" className="group inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
-                <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v8a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm1 0v8h12V4H4zm-1 12a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-              </svg>
-              专业工作台
-              <span className="px-1 py-px rounded bg-indigo-500 text-[9px] font-bold text-white leading-none">NEW</span>
-            </a>
-            <span className="text-gray-300 dark:text-gray-600">·</span>
-            <a href="https://www.xiaohongshu.com/user/profile/623e8b080000000010007721" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-rose-500 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 font-medium transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 1024 1024" fill="currentColor">
-                <path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64z m238.8 360.2l-57.7 93.3c-10.1 16.3-31.5 21.3-47.8 11.2l-112.4-69.5c-16.3-10.1-21.3-31.5-11.2-47.8l57.7-93.3c10.1-16.3 31.5-21.3 47.8-11.2l112.4 69.5c16.3 10.1 21.3 31.5 11.2 47.8zM448 496l-57.7 93.3c-10.1 16.3-31.5 21.3-47.8 11.2l-112.4-69.5c-16.3-10.1-21.3-31.5-11.2-47.8l57.7-93.3c10.1-16.3 31.5-21.3 47.8-11.2l112.4 69.5c16.3 10.1 21.3 31.5 11.2 47.8z m248.9 43.2l-57.7 93.3c-10.1 16.3-31.5 21.3-47.8 11.2l-112.4-69.5c-16.3-10.1-21.3-31.5-11.2-47.8l57.7-93.3c10.1-16.3 31.5-21.3 47.8-11.2l112.4 69.5c16.3 10.1 21.3 31.5 11.2 47.8z"/>
-              </svg>
-              小红书
-            </a>
-            <span className="text-gray-300 dark:text-gray-600">·</span>
-            <a href="https://github.com/Zippland/perler-beads" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                <path fillRule="evenodd" d="M12 0C5.37 0 0 5.48 0 12.25c0 5.42 3.44 10.01 8.2 11.63.6.12.82-.27.82-.6 0-.3-.01-1.08-.02-2.13-3.34.74-4.04-1.65-4.04-1.65-.55-1.44-1.35-1.83-1.35-1.83-1.1-.78.08-.77.08-.77 1.21.09 1.85 1.26 1.85 1.26 1.08 1.9 2.83 1.35 3.52 1.03.11-.81.42-1.35.77-1.66-2.66-.31-5.46-1.36-5.46-6.06 0-1.34.46-2.43 1.22-3.29-.12-.31-.53-1.55.12-3.23 0 0 1-.33 3.29 1.25a10.96 10.96 0 0 1 5.98 0c2.29-1.58 3.29-1.25 3.29-1.25.65 1.68.24 2.92.12 3.23.76.86 1.22 1.95 1.22 3.29 0 4.71-2.81 5.74-5.49 6.05.43.38.81 1.13.81 2.28 0 1.65-.02 2.98-.02 3.39 0 .33.22.72.83.59C20.56 22.25 24 17.67 24 12.25 24 5.48 18.63 0 12 0Z" />
-              </svg>
-              GitHub
-            </a>
-          </div>
           {/* 来源提示 */}
-          <p className="mt-2 text-[10px] text-gray-400 dark:text-gray-500">发布平台请标注来源或保留图片水印及标识</p>
+          <p className="mt-2 text-[10px] text-gray-400 dark:text-gray-500">게시할 때 출처를 표시하거나 이미지의 워터마크 및 표식을 유지해 주세요</p>
         </div>
       </header>
 
@@ -2245,9 +2122,9 @@ export default function Home() {
              <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
           </svg>
           {/* Text color */}
-          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">拖放图片到此处，或<span className="font-medium text-blue-600 dark:text-blue-400">点击选择文件</span></p>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">이미지를 여기에 끌어다 놓거나 <span className="font-medium text-blue-600 dark:text-blue-400">클릭하여 파일 선택</span></p>
           {/* Text color */}
-                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">支持 JPG, PNG, GIF 图片格式，或 CSV 数据文件</p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">JPG, PNG, GIF 이미지 및 CSV 데이터 파일을 지원합니다</p>
         </div>
 
         {/* Apply dark mode styles to the Tip Box */}
@@ -2259,7 +2136,7 @@ export default function Home() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               {/* Text color */}
-              <span className="text-indigo-700 dark:text-indigo-300">小贴士：使用像素图进行转换前，请确保图片的边缘吻合像素格子的边界线，这样可以获得更精确的切割效果和更好的成品。</span>
+              <span className="text-indigo-700 dark:text-indigo-300">팁: 픽셀 이미지를 변환할 때 이미지의 가장자리가 픽셀 격자 경계와 맞도록 하면 더 정확한 분할과 좋은 결과를 얻을 수 있습니다.</span>
             </p>
           </div>
         )}
@@ -2277,7 +2154,7 @@ export default function Home() {
                 <div className="flex-1">
                   {/* Label color */}
                   <label htmlFor="granularityInput" className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">
-                    横轴切割数量 (10-300):
+                    가로 칸 수 (10-300):
                   </label>
                   <div className="flex items-center gap-2">
                     {/* Input field styles */}
@@ -2297,7 +2174,7 @@ export default function Home() {
                 <div className="flex-1">
                     {/* Label color */}
                     <label htmlFor="similarityThresholdInput" className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">
-                        颜色合并阈值 (0-100):
+                        유사 색상 병합 기준 (0-100):
                     </label>
                     <div className="flex items-center gap-2">
                       {/* Input field styles */}
@@ -2319,28 +2196,28 @@ export default function Home() {
                     onClick={handleConfirmParameters}
                     className="h-9 bg-blue-500 hover:bg-blue-600 text-white text-sm px-3 rounded-md whitespace-nowrap transition-colors duration-200 shadow-sm"
                   >
-                    应用数字
+                    수치 적용
                   </button>
                   <button
                     onClick={handleAutoRemoveBackground}
                     disabled={!mappedPixelData || !gridDimensions}
                     className="inline-flex items-center justify-center h-9 px-3 text-sm rounded-md border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200 hover:bg-blue-100 dark:hover:bg-blue-800/40 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                   >
-                    一键去背景
+                    원클릭 배경 제거
                   </button>
                   <button
                     onClick={handleUndoBgRemoval}
                     disabled={!bgRemovalSnapshot}
                     className="inline-flex items-center justify-center h-9 px-3 text-sm rounded-md border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                   >
-                    回撤上一步
+                    이전 단계로 되돌리기
                   </button>
                 </div>
 
                 {/* Pixelation Mode Selector */}
                 <div className="sm:col-span-2">
                   {/* Label color */}
-                  <label htmlFor="pixelationModeSelect" className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">处理模式:</label>
+                  <label htmlFor="pixelationModeSelect" className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">처리 모드:</label>
                   <div className="flex items-center gap-2">
                     {/* Select field styles */}
                     <select
@@ -2349,15 +2226,15 @@ export default function Home() {
                       onChange={handlePixelationModeChange}
                       className="w-full p-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500 h-9 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
                     >
-                      <option value={PixelationMode.Dominant} className="bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200">卡通 (主色)</option>
-                      <option value={PixelationMode.Average} className="bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200">真实 (平均)</option>
+                      <option value={PixelationMode.Dominant} className="bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200">카툰 (주요 색상)</option>
+                      <option value={PixelationMode.Average} className="bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200">실사 (평균 색상)</option>
                     </select>
                   </div>
                 </div>
 
                 {/* 色号系统选择器 */}
                 <div className="sm:col-span-2">
-                  <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">色号系统:</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">색상 코드 시스템:</label>
                   <div className="flex flex-wrap gap-2">
                     {colorSystemOptions.map(option => (
                       <button
@@ -2384,10 +2261,10 @@ export default function Home() {
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M4 2a2 2 0 00-2 2v11a3 3 0 106 0V4a2 2 0 00-2-2H4zm1 14a1 1 0 100-2 1 1 0 000 2zm5-1.757l4.9-4.9a2 2 0 000-2.828L13.485 5.1a2 2 0 00-2.828 0L10 5.757v8.486zM16 18H9.071l6-6H16a2 2 0 012 2v2a2 2 0 01-2 2z" clipRule="evenodd" />
                     </svg>
-                    管理色板 ({Object.values(customPaletteSelections).filter(Boolean).length} 色)
+                    팔레트 관리 ({Object.values(customPaletteSelections).filter(Boolean).length}색)
                   </button>
                   {isCustomPalette && (
-                    <p className="text-xs text-center text-blue-500 dark:text-blue-400 mt-1.5">当前使用自定义色板</p>
+                    <p className="text-xs text-center text-blue-500 dark:text-blue-400 mt-1.5">현재 사용자 지정 팔레트 사용 중</p>
                   )}
                 </div>
               </div>
@@ -2434,14 +2311,14 @@ export default function Home() {
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-blue-500 dark:text-blue-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                         </svg>
-                        <span>使用右上角菜单操作</span>
+                        <span>오른쪽 위 메뉴에서 작업할 수 있습니다</span>
                       </div>
                       <span className="hidden sm:inline text-gray-300 dark:text-gray-500">|</span>
                       <div className="flex items-center gap-1 w-full sm:w-auto">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-blue-500 dark:text-blue-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
-                        <span>推荐电脑操作，上色更精准</span>
+                        <span>더 정확한 채색을 위해 컴퓨터 사용을 권장합니다</span>
                       </div>
                     </div>
                   </div>
@@ -2458,7 +2335,7 @@ export default function Home() {
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <span>高精度网格 ({gridDimensions.N}×{gridDimensions.M}) - 画布已自动放大，可左右滚动、放大查看精细图像</span>
+                      <span>고정밀 격자 ({gridDimensions.N}×{gridDimensions.M}) - 캔버스가 자동으로 확대되었습니다. 좌우 스크롤 및 확대하여 세부 이미지를 확인할 수 있습니다</span>
                     </div>
                   </div>
                 )}
@@ -2487,10 +2364,10 @@ export default function Home() {
           <div className="w-full md:max-w-2xl mt-6 bg-white dark:bg-gray-800 p-4 rounded-lg shadow border border-gray-100 dark:border-gray-700 color-stats-panel">
             {/* Title color */}
             <h3 className="text-lg font-semibold mb-1 text-gray-700 dark:text-gray-200 text-center">
-              去除杂色 
+              불필요한 색상 제거 
             </h3>
             {/* Subtitle color */}
-            <p className="text-xs text-center text-gray-500 dark:text-gray-400 mb-3">点击下方列表中的颜色可将其从可用列表中排除。总计: {totalBeadCount} 颗</p>
+            <p className="text-xs text-center text-gray-500 dark:text-gray-400 mb-3">아래 목록에서 색상을 클릭하면 사용 가능한 색상에서 제외할 수 있습니다. 총 {totalBeadCount}개</p>
             <ul className="space-y-1 max-h-60 overflow-y-auto pr-2 text-sm">
               {Object.keys(colorCounts)
                 .sort(sortColorKeys)
@@ -2511,7 +2388,7 @@ export default function Home() {
                           ? 'bg-red-100 dark:bg-red-900/50 hover:bg-red-200 dark:hover:bg-red-800/60 opacity-60 dark:opacity-70' // Darker red background for excluded
                           : 'hover:bg-gray-100 dark:hover:bg-gray-700'
                       }`}
-                      title={isExcluded ? `点击恢复 ${displayColorKey}` : `点击排除 ${displayColorKey}`}
+                      title={isExcluded ? `${displayColorKey} 복원` : `${displayColorKey} 제외`}
                     >
                       <div className={`flex items-center space-x-2 ${isExcluded ? 'line-through' : ''}`}>
                         {/* Adjust color swatch border */}
@@ -2523,7 +2400,7 @@ export default function Home() {
                         <span className={`font-mono font-medium ${isExcluded ? 'text-red-700 dark:text-red-400' : 'text-gray-800 dark:text-gray-200'}`}>{displayColorKey}</span>
                       </div>
                       {/* Adjust text color for count (normal and excluded) */}
-                      <span className={`text-xs ${isExcluded ? 'text-red-600 dark:text-red-400 line-through' : 'text-gray-600 dark:text-gray-300'}`}>{count} 颗</span>
+                      <span className={`text-xs ${isExcluded ? 'text-red-600 dark:text-red-400 line-through' : 'text-gray-600 dark:text-gray-300'}`}>{count}개</span>
                     </li>
                   );
                 })}
@@ -2534,7 +2411,7 @@ export default function Home() {
                     onClick={() => setShowExcludedColors(prev => !prev)}
                     className="w-full text-xs py-1.5 px-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors flex items-center justify-between"
                   >
-                    <span>已排除的颜色 ({excludedColorKeys.size})</span>
+                    <span>제외된 색상 ({excludedColorKeys.size})</span>
                     <svg 
                       xmlns="http://www.w3.org/2000/svg" 
                       className={`h-4 w-4 text-gray-500 dark:text-gray-400 transform transition-transform ${showExcludedColors ? 'rotate-180' : ''}`}
@@ -2564,7 +2441,7 @@ export default function Home() {
                                   </div>
                                   <button
                                     onClick={() => {
-                                      // 实现恢复单个颜色的逻辑
+                                      // 实现복원单个颜色的逻辑
                                       const newExcludedKeys = new Set(excludedColorKeys);
                                       newExcludedKeys.delete(hexKey);
                                       setExcludedColorKeys(newExcludedKeys);
@@ -2575,7 +2452,7 @@ export default function Home() {
                                     }}
                                     className="text-xs py-0.5 px-2 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded hover:bg-blue-200 dark:hover:bg-blue-800/40"
                                   >
-                                    恢复
+                                    복원
                                   </button>
                                 </li>
                               );
@@ -2583,14 +2460,14 @@ export default function Home() {
                           </ul>
                         ) : (
                           <p className="text-xs text-center text-gray-500 dark:text-gray-400 py-2">
-                            没有排除的颜色
+                            제외된 색상이 없습니다
                           </p>
                         )}
                       </div>
                       
                       <button
                         onClick={() => {
-                          // 恢复所有颜色的逻辑
+                          // 복원所有颜色的逻辑
                           setExcludedColorKeys(new Set());
                           setRemapTrigger(prev => prev + 1);
                           setIsManualColoringMode(false);
@@ -2599,7 +2476,7 @@ export default function Home() {
                         }}
                         className="mt-2 w-full text-xs py-1 px-2 bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors"
                       >
-                        一键恢复所有颜色
+                        一键복원所有颜色
                       </button>
                     </div>
                   )}
@@ -2612,7 +2489,7 @@ export default function Home() {
          {!isManualColoringMode && originalImageSrc && activeBeadPalette.length === 0 && excludedColorKeys.size > 0 && (
              // Apply dark mode styles to the warning box
              <div className="w-full md:max-w-2xl mt-6 bg-yellow-100 dark:bg-yellow-900/50 p-4 rounded-lg shadow border border-yellow-200 dark:border-yellow-800/60 text-center text-sm text-yellow-800 dark:text-yellow-300">
-                 当前可用颜色过少或为空。请在上方统计列表中查看已排除的颜色并恢复部分，或更换色板。
+                 当前可用颜色过少或为空。请在上方统计列表中查看已排除的颜色并복원部分，或更换色板。
                  {excludedColorKeys.size > 0 && (
                       // Apply dark mode styles to the inline "restore all" button
                       <button
@@ -2628,7 +2505,7 @@ export default function Home() {
                           }}
                           className="mt-2 ml-2 text-xs py-1 px-2 bg-yellow-200 dark:bg-yellow-700/60 text-yellow-900 dark:text-yellow-200 rounded hover:bg-yellow-300 dark:hover:bg-yellow-600/70 transition-colors"
                       >
-                          查看已排除颜色 ({excludedColorKeys.size})
+                          제외된 색상 보기 ({excludedColorKeys.size})
                       </button>
                   )}
              </div>
@@ -2647,7 +2524,7 @@ export default function Home() {
                 className={`w-full py-2.5 px-4 text-sm sm:text-base rounded-lg transition-all duration-300 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg hover:translate-y-[-1px]`}
               >
                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"> <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /> </svg>
-                 进入手动编辑模式
+                 수동 편집 모드 시작
              </button>
 
              {/* Focus Mode Button */}
@@ -2659,7 +2536,7 @@ export default function Home() {
                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                  </svg>
-                 进入专心拼豆模式（AplhaTest）
+                 집중 펄러비즈 모드 시작 (Alpha Test)
              </button>
             </div>
         )} {/* ++ End of RENDER Enter Manual Mode Button ++ */}
@@ -2674,7 +2551,7 @@ export default function Home() {
                 className="w-full py-2.5 px-4 bg-gradient-to-r from-green-500 to-green-600 text-white text-sm sm:text-base rounded-lg hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg hover:translate-y-[-1px] disabled:hover:translate-y-0 disabled:hover:shadow-md"
                >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                下载拼豆图纸
+                펄러비즈 도안 다운로드
               </button>
             </div>
         )} {/* ++ End of HIDE Download Buttons ++ */}
@@ -2781,12 +2658,12 @@ export default function Home() {
             <path d="M9.5 14.5L9 16" stroke="#7d2a5a" />
             <path d="M14.5 14.5L15 16" stroke="#7d2a5a" />
           </svg>
-          <span>请作者喝一杯奶茶</span>
+          <span>개발자에게 밀크티 한 잔 후원하기</span>
         </button>
 
         {/* Copyright text color */}
         <p className="font-medium text-gray-600 dark:text-gray-300">
-          七卡瓦 拼豆底稿生成器 &copy; {new Date().getFullYear()}
+          치카와 펄러비즈 도안 생성기 &copy; {new Date().getFullYear()}
         </p>
       </footer>
 
